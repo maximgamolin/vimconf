@@ -77,7 +77,9 @@ set incsearch "Инкрементальный поиск
 
 syntax on "Подсветка синтаксиса
 set completeopt=menu,menuone,noselect " Отключение стандартного автодополнения для nvim-cmp
-
+" Настройка заголовка окна
+set title 
+set titlestring=%{getcwd()}
 "Настройка цветовой схемы
 
 " Количество цветов для терминала (256 или 16)
