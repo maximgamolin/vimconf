@@ -1,4 +1,5 @@
 " Установить ctags, fzf, fd, ripgrep
+" Для python установить debugpy
 call plug#begin()
 "Дерево слева
 Plug 'preservim/nerdtree', { 'on': 'NERDTreeToggle' }
@@ -290,7 +291,9 @@ call quickui#menu#install('H&elp', [
 
 call quickui#menu#install("&Run",[
         \ ['Terminal', 'FloatermNew --height=0.2 --width=1.00 --wintype=split --position=bottom', ''],
-        \ ['Close Terminal', "FloatermKill"]
+        \ ['Close Terminal', "FloatermKill"],
+        \ ['--', ''],
+        \ ['Debug window', 'lua require("dapui").toggle()', '']
 \])
 call quickui#menu#install("Git",[
         \ ['Blame', 'Git blame', ''],
@@ -652,7 +655,26 @@ cmp_ai:setup({
 })
 
 -- DAP для python
-require("dap-python").setup(venv_path)
+local dap_python = require("dap-python")
+dap_python.setup(venv_path)
+dap_python.test_runner = vim.env.PYTESTRUNNER or 'pytest'
+
+-- Автоматичеси открывать и закрывать окно при запуске дебаггера
+local dap, dapui = require("dap"), require("dapui")
+dap.listeners.before.attach.dapui_config = function()
+  dapui.open()
+end
+dap.listeners.before.launch.dapui_config = function()
+  dapui.open()
+end
+dap.listeners.before.event_terminated.dapui_config = function()
+  dapui.close()
+end
+dap.listeners.before.event_exited.dapui_config = function()
+  dapui.close()
+end
+
+require("dapui").setup()
 EOF
 
 "Настройка telescope + fzf
