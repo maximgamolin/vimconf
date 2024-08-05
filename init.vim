@@ -614,7 +614,7 @@ end
 
   -- LSP setup for Python
   local servers = { 'pyright' } -- Add other servers if needed
-  local venv_path = tostring(vim.fn.getenv('VIRTUAL_ENV'))
+  local venv_path = tostring(vim.fn.getenv('VIRTUAL_ENV_PYTHON'))
 
   for _, lsp in ipairs(servers) do
     local settings = {}
@@ -656,7 +656,7 @@ cmp_ai:setup({
 
 -- DAP для python
 local dap_python = require("dap-python")
-dap_python.setup(venv_path)
+dap_python.setup(vim.env.VIRTUAL_ENV_PYTHON)
 dap_python.test_runner = vim.env.PYTESTRUNNER or 'pytest'
 
 -- Автоматичеси открывать и закрывать окно при запуске дебаггера
