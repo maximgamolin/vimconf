@@ -104,6 +104,14 @@ hi LineNr guifg=#d3b58d            " Цвет номеров строк
 hi CursorLineNr guifg=#fabd2f      " Цвет номера строки под курсором
 hi Comment guifg=#7c6f64           " Цвет комментариев
 
+" DAP горячие клавиши
+
+nnoremap <silent> <leader>db :lua require('dap').toggle_breakpoint()<CR>
+nnoremap <silent> <leader>dd :lua require('dap').continue()<CR>
+nnoremap <silent> <leader>dn :lua require('dap-python').test_method()<CR>
+nnoremap <silent> <leader>df :lua require('dap-python').test_class()<CR>
+vnoremap <silent> <leader>ds <ESC>:lua require('dap-python').debug_selection()<CR>
+
 
 "Telescope горячие клавиши
 nnoremap <leader>ff <cmd>Telescope find_files<cr>
