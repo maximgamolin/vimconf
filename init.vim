@@ -293,7 +293,12 @@ call quickui#menu#install("&Run",[
         \ ['Terminal', 'FloatermNew --height=0.2 --width=1.00 --wintype=split --position=bottom', ''],
         \ ['Close Terminal', "FloatermKill"],
         \ ['--', ''],
-        \ ['Debug window', 'lua require("dapui").toggle()', '']
+        \ ['Toggle debug window', 'lua require("dapui").toggle()', ''],
+        \ ['--', ''],
+        \ ['Start\Continue debug', "lua require'dap'.continue()", ''],
+        \ ['Debug closest test method\t(\\dm)', "lua require('dap-python').test_method()", ''], 
+        \ ['Debug closest test class\t(\\dc)', "lua require('dap-python').test_class()", ''],
+        \ ['Debug selection in visual mode\t(\\ds)', "lua require('dap-python').debug_selection()", ''],
 \])
 call quickui#menu#install("Git",[
         \ ['Blame', 'Git blame', ''],
