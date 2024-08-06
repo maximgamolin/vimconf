@@ -303,6 +303,7 @@ call quickui#menu#install("&Run",[
         \ ['--', ''],
         \ ['Toggle debug window', 'lua require("dapui").toggle()', ''],
         \ ['--', ''],
+        \ ['Toggle breakpoint\t(\\db)', "lua require'dap'.toggle_breakpoint()", ''],
         \ ['Start\Continue debug', "lua require'dap'.continue()", ''],
         \ ['Debug closest test method\t(\\dm)', "lua require('dap-python').test_method()", ''], 
         \ ['Debug closest test class\t(\\dc)', "lua require('dap-python').test_class()", ''],
