@@ -20,6 +20,7 @@ Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 "Смотреть в коде какой элемент за что отвечает, чтобы настроить потом
 "подстветку
 Plug 'nvim-treesitter/playground'
+Plug 'nvim-treesitter/nvim-treesitter-refactor' " Подсветка переменных в области видимости
 "Телескоп для поиска
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.8' }
@@ -412,8 +413,34 @@ require'nvim-treesitter.configs'.setup {
   -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
   -- auto_install = true,
 
-
-
+  refactor = {
+    highlight_definitions = {
+      enable = true,            -- Включение выделения объявления
+      clear_on_cursor_move = true, -- Очистка выделения при движении курсора
+    },
+    highlight_current_scope = {
+      enable = false             -- Выделение текущей области (опционально)
+    },
+    smart_rename = {
+      enable = true,
+      -- Assign keymaps to false to disable them, e.g. `smart_rename = false`.
+      keymaps = {
+        smart_rename = "grr",
+      },
+    },
+    navigation = {
+      enable = true,
+      -- Assign keymaps to false to disable them, e.g. `goto_definition = false`.
+      keymaps = {
+        goto_definition = "gnd",
+        list_definitions = "gnD",
+        list_definitions_toc = "gO",
+        goto_next_usage = "<a-*>",
+        goto_previous_usage = "<a-#>",
+      },
+    },
+  },
+  ensure_installed = {"python",},
   highlight = {
     enable = true,
     playground = {
