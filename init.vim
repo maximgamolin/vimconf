@@ -672,6 +672,15 @@ end
       settings = settings,
     })
   end
+
+  -- Настройка посветки определений функции и класса 
+  vim.cmd [[
+    augroup lsp_document_highlight
+      autocmd!
+      autocmd CursorHold,CursorHoldI * lua vim.lsp.buf.document_highlight()
+      autocmd CursorMoved,CursorMovedI * lua vim.lsp.buf.clear_references()
+    augroup END
+]]
 -- Автодополнения от нейронки (пока не работает)
 local cmp_ai = require('cmp_ai.config')
 
