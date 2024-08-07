@@ -10,6 +10,8 @@ Plug 'maxmx03/solarized.nvim'
 "Полоска снизу
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
+" Скроллбар
+Plug 'Xuyuanp/scrollbar.nvim'
 "Цветные отступы
 Plug 'lukas-reineke/indent-blankline.nvim'
 "Терминал
@@ -791,4 +793,11 @@ EOF
 "Настройка telescope + fzf
 lua require('telescope').load_extension('fzy_native')
 
+" Настройка сроллбара
+augroup ScrollbarInit
+  autocmd!
+  autocmd WinScrolled,VimResized,QuitPre * silent! lua require('scrollbar').show()
+  autocmd WinEnter,FocusGained           * silent! lua require('scrollbar').show()
+  autocmd WinLeave,BufLeave,BufWinLeave,FocusLost            * silent! lua require('scrollbar').clear()
+augroup end
 
