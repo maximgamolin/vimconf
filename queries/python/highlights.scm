@@ -15,10 +15,10 @@
   (decorator
     (call
       function: (identifier) @decorator.call)))
-
+;; Подсветка self
 ((identifier) @parameter.self 
 (#eq? @parameter.self "self"))
-
+;; Подсветка cls
 ((identifier) @parameter.cls 
 (#eq? @parameter.cls "cls"))
 
