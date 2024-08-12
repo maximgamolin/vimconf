@@ -53,7 +53,6 @@ Plug 'hrsh7th/cmp-path'         " Источник путей для nvim-cmp
 Plug 'tzachar/cmp-ai'           " Дополнений от нейронки
 Plug 'saadparwaiz1/cmp_luasnip' " Источник для snippets
 Plug 'L3MON4D3/LuaSnip'         " Плагин для snippets
-Plug 'rafamadriz/friendly-snippets' " Коллекция snippets
 Plug 'ray-x/lsp_signature.nvim' " Автодополнение сигнатуры методов
 " DAP
 Plug 'mfussenegger/nvim-dap'
@@ -179,9 +178,8 @@ let NERDTreeShowBookmarks=1       " Показывать закладки
 autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | q | endif
 
 " Опции NERDTree
-let NERDTreeMinimalUI=1           " Минимальный интерфейс
+let NERDTreeMinimalUI=0           " Минимальный интерфейс
 let NERDTreeDirArrows=1           " Отображение стрелок для директории
-
 " Настройки blamer.nvim 
 let g:blamer_enabled = 1
 let g:blamer_delay = 0
@@ -266,6 +264,7 @@ call quickui#menu#install('&File', [
             \ [ "Save &As", 'echo 4' ],
             \ [ "Save All", 'echo 5' ],
             \ [ "--", '' ],
+            \ [ "Close menu", "call quickui#menu#close()", ""],
             \ [ "E&xit\tAlt+x", 'echo 6' ],
             \ ])
 
@@ -642,6 +641,9 @@ end
   cmp_ai = '[AI]',
   path = '[Path]',
 }  -- маппинг для нейросети, пока не работает
+-- Загрузка кастомных снипетов
+  require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/lua/snippets/" })
+
   local lspkind = require('lspkind') -- Красивые шрифты
   cmp.setup({
     snippet = {
@@ -654,7 +656,7 @@ end
       ['<C-f>'] = cmp.mapping.scroll_docs(4),
       ['<C-Space>'] = cmp.mapping.complete(),
       ['<C-e>'] = cmp.mapping.close(),
-      ['<CR>'] = cmp.mapping.confirm({ select = true }),
+      ['<CR>'] = cmp.mapping.confirm(),
       ['<Down>'] = cmp.mapping.select_next_item(),
       ['<Up>'] = cmp.mapping.select_prev_item(),
       ['<Right>'] = cmp.mapping.scroll_docs(4),
@@ -715,7 +717,6 @@ end
     }
 
   })
-
   -- LSP setup for Python
   local servers = { 'pyright' } -- Add other servers if needed
   local venv_path = tostring(vim.fn.getenv('VIRTUAL_ENV_PYTHON'))
@@ -788,6 +789,21 @@ end
 -- end
 
 require("dapui").setup()
+
+-- Функция для вывода всех загруженных сниппетов
+local function print_snippets()
+  local ls = require("luasnip")
+  local snippets = ls.snippets
+  for ft, snips in pairs(snippets) do
+    print("Язык: " .. ft)
+    for _, snip in ipairs(snips) do
+      print("  Сниппет: " .. (snip.trigger or snip.name))
+    end
+  end
+end
+
+-- Вызов функции для вывода сниппетов
+print_snippets()
 EOF
 
 "Настройка telescope + fzf
@@ -800,4 +816,5 @@ augroup ScrollbarInit
   autocmd WinEnter,FocusGained           * silent! lua require('scrollbar').show()
   autocmd WinLeave,BufLeave,BufWinLeave,FocusLost            * silent! lua require('scrollbar').clear()
 augroup end
+
 
