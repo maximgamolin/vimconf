@@ -179,9 +179,16 @@ let NERDTreeShowBookmarks=1       " Показывать закладки
 " Автоматическое закрытие в случае, если это единственное окно
 autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | q | endif
 
+" Номера строк в NerdTree
+autocmd FileType nerdtree setlocal number
+" скрыть pyache файлы и папки
+let NERDTreeIgnore = ['^__pycache__$', '\.pyc$', '\.pyo$']
+
+
 " Опции NERDTree
 let NERDTreeMinimalUI=0           " Минимальный интерфейс
 let NERDTreeDirArrows=1           " Отображение стрелок для директории
+let NERDTreeShowHidden=1       " Показывать скрытые файлы
 " Настройки blamer.nvim 
 let g:blamer_enabled = 1
 let g:blamer_delay = 0
