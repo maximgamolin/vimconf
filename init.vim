@@ -64,6 +64,8 @@ Plug 'onsails/lspkind.nvim'
 Plug 'ryanoasis/vim-devicons' " Дев иконки везде 
 " Комментировать участки кода
 Plug 'preservim/nerdcommenter'
+" Закрывать парные скобки
+Plug 'windwp/nvim-autopairs'
 
 call plug#end()
 
@@ -804,6 +806,10 @@ end
 
 -- Вызов функции для вывода сниппетов
 print_snippets()
+
+-- Автоматически закрывать скобки
+local npairs = require("nvim-autopairs")
+npairs.setup({check_ts = true,})
 EOF
 
 "Настройка telescope + fzf
