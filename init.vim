@@ -728,8 +728,8 @@ end
   })
   -- LSP setup for Python
   local servers = { 'pyright' } -- Add other servers if needed
-  local venv_path = tostring(vim.fn.getenv('VIRTUAL_ENV_PYTHON'))
-
+  local venv_path = tostring(vim.fn.getenv('VIRTUAL_ENV'))
+print(venv_path)
   for _, lsp in ipairs(servers) do
     local settings = {}
     if lsp == 'pyright' and venv_path ~= '' then
