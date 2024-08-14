@@ -1,9 +1,6 @@
 " Установить ctags, fzf, fd, ripgrep
 " Для python установить debugpy
 call plug#begin()
-"Дерево слева
-Plug 'preservim/nerdtree', { 'on': 'NERDTreeToggle' }
-Plug 'Xuyuanp/nerdtree-git-plugin' " Гит плагин для дерева слева
 "Цветовая схема
 Plug 'morhetz/gruvbox'
 Plug 'maxmx03/solarized.nvim'
@@ -68,7 +65,8 @@ Plug 'preservim/nerdcommenter'
 Plug 'windwp/nvim-autopairs'
 " Вкладки сверху
 Plug 'akinsho/bufferline.nvim', { 'tag': '*' }
-
+" Дерево файлов
+Plug 'nvim-tree/nvim-tree.lua'
 call plug#end()
 
 
@@ -132,65 +130,10 @@ nnoremap <F5> :UndotreeToggle<CR>
 " Открыть бар с функциями и классами
 nnoremap <F8> :TagbarToggle<CR>
 
-" Использовать Nerd-fonts для git плагина для nerdtree
-let g:NERDTreeGitStatusUseNerdFonts = 1
-" Показывать инорируемые файлы для nerdtree-git-plugin
-let g:NERDTreeGitStatusShowIgnored = 1
-" Учитывать гит репозитории в поддиректорияз
-let g:NERDTreeGitStatusConceal = 0
 
-" Настройки горячих клавиш для NERDTree
+" Открыть NvimTree
+nnoremap <silent> <C-n> :NvimTreeFocus<CR>
 
-" Открыть NERDTree
-nnoremap <silent> <C-n> :NERDTreeToggle<CR>
-
-" Переключение между NERDTree и открытым файлом
-nnoremap <silent> <C-t> :NERDTreeFind<CR>
-
-" Горячие клавиши внутри NERDTree
-
-" Открыть файл или директорию
-let NERDTreeMapOpen= 'o'          " Открыть, но остаться в дереве
-let NERDTreeMapOpenSplit= 'i'     " Открыть в горизонтальном сплите
-let NERDTreeMapOpenVSplit= 's'    " Открыть в вертикальном сплите
-let NERDTreeMapOpenInTab= 't'     " Открыть в новой вкладке
-
-" Перемещение по дереву
-let NERDTreeMapOpenInNewTab= 'T'  " Открыть в новой вкладке и перейти в нее
-let NERDTreeMapToggleFile= 'x'    " Закрыть/открыть директорию в дереве
-let NERDTreeMapPreview= 'P'       " Предварительный просмотр файла
-
-" Навигация
-let NERDTreeMapChangeRoot= 'C'    " Сделать текущую директорию корневой
-let NERDTreeMapUpDir= 'u'         " Перейти на директорию выше
-let NERDTreeMapToggleMenu= 'm'    " Вызвать меню действий (создать файл/директорию и т.д.)
-
-" Работа с узлами
-let NERDTreeMapAddFile= 'a'       " Добавить новый файл/директорию
-let NERDTreeMapDeleteNode= 'D'    " Удалить файл/директорию
-let NERDTreeMapRenameNode= 'r'    " Переименовать файл/директорию
-let NERDTreeMapRefreshRoot= 'R'   " Обновить дерево
-
-" Другие полезные команды
-let NERDTreeMapHelp= '?'          " Показать справку по NERDTree
-let NERDTreeMapCWD= 'cd'          " Изменить текущую директорию на выбранную в NERDTree
-
-" Добавление дерева буферов
-let NERDTreeShowBookmarks=1       " Показывать закладки
-
-" Автоматическое закрытие в случае, если это единственное окно
-autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | q | endif
-
-" Номера строк в NerdTree
-autocmd FileType nerdtree setlocal number
-" скрыть pyache файлы и папки
-let NERDTreeIgnore = ['^__pycache__$', '\.pyc$', '\.pyo$']
-
-
-" Опции NERDTree
-let NERDTreeMinimalUI=0           " Минимальный интерфейс
-let NERDTreeDirArrows=1           " Отображение стрелок для директории
-let NERDTreeShowHidden=1       " Показывать скрытые файлы
 " Настройки blamer.nvim 
 let g:blamer_enabled = 1
 let g:blamer_delay = 0
@@ -823,6 +766,39 @@ print_snippets()
 -- Автоматически закрывать скобки
 local npairs = require("nvim-autopairs")
 npairs.setup({check_ts = true,})
+
+-- Настройки для NvimTree
+
+-- disable netrw at the very start of your init.lua
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+-- optionally enable 24-bit colour
+vim.opt.termguicolors = true
+
+-- empty setup using defaults
+require("nvim-tree").setup()
+
+-- OR setup with some options
+require("nvim-tree").setup({
+  sort = {
+    sorter = "case_sensitive",
+  },
+  view = {
+    width = 30,
+    number = true, -- Включить номера строк
+  },
+  renderer = {
+    group_empty = true,
+    indent_markers = {
+      enable = true,  -- Показывать/скрывать маркеры отступов
+    },
+    
+  },
+  filters = {
+    dotfiles = true,
+  },
+})
 EOF
 
 "Настройка telescope + fzf
