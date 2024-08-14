@@ -67,6 +67,8 @@ Plug 'windwp/nvim-autopairs'
 Plug 'akinsho/bufferline.nvim', { 'tag': '*' }
 " Дерево файлов
 Plug 'nvim-tree/nvim-tree.lua'
+" Закладки в коде
+Plug 'MattesGroeger/vim-bookmarks'
 call plug#end()
 
 
@@ -139,6 +141,23 @@ let g:blamer_enabled = 1
 let g:blamer_delay = 0
 let g:blamer_prefix = ' > '
 highlight Blamer guifg=#928374
+
+" Настройки vim-bookmarks
+
+let g:bookmark_sign = '⚑'
+let g:bookmark_annotation_sign = '☰'
+let g:bookmark_no_default_key_mappings = 1
+let g:bookmark_save_per_working_dir = 1 "Сохраянять закладка в зависимости от проекта в файл .vim-bookmarks 
+let g:bookmark_auto_save = 1
+
+nnoremap bm <Plug>BookmarkToggle
+nnoremap bi <Plug>BookmarkAnnotate
+nnoremap bc <Plug>BookmarkClear
+nnoremap bn <Plug>BookmarkNext
+nnoremap bp <Plug>BookmarkPrev
+nnoremap bl <Plug>BookmarkShowAll
+nnoremap bx <Plug>BookmarkClearAll
+
 
 " Настройки vim-airline
 
@@ -236,7 +255,10 @@ call quickui#menu#install('&Edit', [
             \ [ "--", ""],
             \ [ "Локальная история\t(F5)", "UndotreeToggle", ""],
             \ [ "--", ""],
-            \ [ "Места использования", "lua require('telescope.builtin').lsp_references()", ""]
+            \ [ "Места использования", "lua require('telescope.builtin').lsp_references()", ""],
+            \ [ "--", ""],
+            \ ['Список закладок', "BookmarkShowAll"],
+            \ ['Удалить все заклаки', "BookmarkClearAll"],
             \ ])
 
 " script inside %{...} will be evaluated and expanded in the string
@@ -275,11 +297,20 @@ call quickui#menu#install("Git",[
         \ ['История файла', 'Telescope git_bcommits', ''],
         \ ['История выделенного', 'call GitLogForVisualRange()', ''],
 \])
+
+"Контекстное меню (как по правой кнопке)
+let contextMenu = [
+      \ ['Toggle bookmark',     ':BookmarkToggle'],
+      \ ]
+let opts = {'index':g:quickui#context#cursor}
+
 " enable to display tips in the cmdline
 let g:quickui_show_tip = 1
 
 " Открыть менб
 noremap <space><space> :call quickui#menu#open()<cr>
+nnoremap <silent> <leader>m :call quickui#context#open(contextMenu, opts)<CR>
+
 
 function! FindGitRelativePath(file)
   " Поиск ближайший папки гит от файла
