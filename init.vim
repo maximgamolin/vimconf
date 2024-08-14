@@ -66,6 +66,8 @@ Plug 'ryanoasis/vim-devicons' " Дев иконки везде
 Plug 'preservim/nerdcommenter'
 " Закрывать парные скобки
 Plug 'windwp/nvim-autopairs'
+" Вкладки сверху
+Plug 'akinsho/bufferline.nvim', { 'tag': '*' }
 
 call plug#end()
 
@@ -198,7 +200,7 @@ highlight Blamer guifg=#928374
 " Настройки vim-airline
 
 " Активировать vim-airline
-let g:airline#extensions#tabline#enabled = 1         " Включить табы сверху
+let g:airline#extensions#tabline#enabled = 0         " Включить табы сверху
 
 " Показ числа вкладок и буферов
 let g:airline#extensions#tabline#show_tabs = 1       " Показать вкладки
@@ -729,7 +731,7 @@ end
   -- LSP setup for Python
   local servers = { 'pyright' } -- Add other servers if needed
   local venv_path = tostring(vim.fn.getenv('VIRTUAL_ENV'))
-print(venv_path)
+print('Python virtual env: ' .. venv_path)
   for _, lsp in ipairs(servers) do
     local settings = {}
     if lsp == 'pyright' and venv_path ~= '' then
@@ -797,7 +799,11 @@ end
 --   dapui.close()
 -- end
 
+-- UI для дебага
 require("dapui").setup()
+
+-- Вкладки сверху
+require("bufferline").setup{}
 
 -- Функция для вывода всех загруженных сниппетов
 local function print_snippets()
