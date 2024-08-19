@@ -135,8 +135,6 @@ nnoremap <F5> :UndotreeToggle<CR>
 nnoremap <F8> :TagbarToggle<CR>
 
 
-" Открыть NvimTree
-nnoremap <silent> <C-n> :NvimTreeFocus<CR>
 
 " Настройки blamer.nvim 
 let g:blamer_enabled = 1

@@ -33,3 +33,4 @@ require("nvim-tree").setup({
 -- не могу нормально настроить цветовые отметки в дереве
 -- require('plugins.nvimtreeplug.nvim_tree_colors')
 
+require('plugins.nvimtreeplug.hotkeys')
