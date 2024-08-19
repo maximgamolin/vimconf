@@ -74,6 +74,7 @@ call plug#end()
 lua require('plugins.nvimtreeplug.main')
 lua require('plugins.vimbookmarks.main')
 lua require('plugins.vimairline.main')
+lua require('plugins.blamer.main')
 
 set number "Номера строк
 set cursorline     " Подсветка текущей строки
@@ -129,12 +130,6 @@ nnoremap <F5> :UndotreeToggle<CR>
 nnoremap <F8> :TagbarToggle<CR>
 
 
-
-" Настройки blamer.nvim 
-let g:blamer_enabled = 1
-let g:blamer_delay = 0
-let g:blamer_prefix = ' > '
-highlight Blamer guifg=#928374
 
 "Моя шпаргалка
 lua require('h')
