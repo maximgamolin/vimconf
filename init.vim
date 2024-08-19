@@ -71,6 +71,8 @@ Plug 'nvim-tree/nvim-tree.lua'
 Plug 'MattesGroeger/vim-bookmarks'
 call plug#end()
 
+" Подключение конфига плагинов
+lua require('plugins.nvimtreeplug.main')
 
 
 set number "Номера строк
@@ -809,38 +811,6 @@ print_snippets()
 local npairs = require("nvim-autopairs")
 npairs.setup({check_ts = true,})
 
--- Настройки для NvimTree
-
--- disable netrw at the very start of your init.lua
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
-
--- optionally enable 24-bit colour
-vim.opt.termguicolors = true
-
--- empty setup using defaults
-require("nvim-tree").setup()
-
--- OR setup with some options
-require("nvim-tree").setup({
-  sort = {
-    sorter = "case_sensitive",
-  },
-  view = {
-    width = 30,
-    number = true, -- Включить номера строк
-  },
-  renderer = {
-    group_empty = true,
-    indent_markers = {
-      enable = true,  -- Показывать/скрывать маркеры отступов
-    },
-    
-  },
-  filters = {
-    dotfiles = true,
-  },
-})
 EOF
 
 "Настройка telescope + fzf
