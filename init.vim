@@ -71,6 +71,7 @@ Plug 'MattesGroeger/vim-bookmarks'
 call plug#end()
 
 " Подключение конфига плагинов
+lua require('h') 
 lua require('plugins.nvimtreeplug.main')
 lua require('plugins.vimbookmarks.main')
 lua require('plugins.vimairline.main')
@@ -132,7 +133,6 @@ nnoremap <F8> :TagbarToggle<CR>
 
 
 "Моя шпаргалка
-lua require('h')
 
 "Цвета для пробелов при цветных отступах
 
