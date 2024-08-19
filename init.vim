@@ -76,6 +76,7 @@ lua require('plugins.nvimtreeplug.main')
 lua require('plugins.vimbookmarks.main')
 lua require('plugins.vimairline.main')
 lua require('plugins.blamer.main')
+lua require('plugins.vimfloaterm.main')
 
 set number "Номера строк
 set cursorline     " Подсветка текущей строки
@@ -132,7 +133,6 @@ nnoremap <F8> :TagbarToggle<CR>
 
 
 
-"Моя шпаргалка
 
 "Цвета для пробелов при цветных отступах
 
@@ -146,9 +146,6 @@ highlight RainbowCyanSpace guibg=#EEF3DF
 
 highlight link PySyntaxKwargs Green
 
-
-"Горячие клавиши для терминала
-nmap <silent> <C-d> :FloatermNew --height=0.2 --width=1.00 --wintype=split --position=bottom<CR> 
 " clear all the menus
 call quickui#menu#reset()
 
