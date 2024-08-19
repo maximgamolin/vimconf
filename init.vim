@@ -73,6 +73,7 @@ call plug#end()
 
 " Подключение конфига плагинов
 lua require('plugins.nvimtreeplug.main')
+lua require('plugins.vimbookmarks.main')
 
 
 set number "Номера строк
@@ -141,23 +142,6 @@ let g:blamer_enabled = 1
 let g:blamer_delay = 0
 let g:blamer_prefix = ' > '
 highlight Blamer guifg=#928374
-
-" Настройки vim-bookmarks
-
-let g:bookmark_sign = '⚑'
-let g:bookmark_annotation_sign = '☰'
-let g:bookmark_no_default_key_mappings = 1
-let g:bookmark_save_per_working_dir = 1 "Сохраянять закладка в зависимости от проекта в файл .vim-bookmarks 
-let g:bookmark_auto_save = 1
-
-nnoremap bm <Plug>BookmarkToggle
-nnoremap bi <Plug>BookmarkAnnotate
-nnoremap bc <Plug>BookmarkClear
-nnoremap bn <Plug>BookmarkNext
-nnoremap bp <Plug>BookmarkPrev
-nnoremap bl <Plug>BookmarkShowAll
-nnoremap bx <Plug>BookmarkClearAll
-
 
 " Настройки vim-airline
 

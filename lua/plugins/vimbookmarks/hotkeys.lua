@@ -1,0 +1,7 @@
+vim.api.nvim_set_keymap('n', 'bm', '<Plug>BookmarkToggle', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', 'bi', '<Plug>BookmarkAnnotate', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', 'bc', '<Plug>BookmarkClear', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', 'bn', '<Plug>BookmarkNext', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', 'bp', '<Plug>BookmarkPrev', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', 'bl', '<Plug>BookmarkShowAll', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', 'bx', '<Plug>BookmarkClearAll', { noremap = true, silent = true })
