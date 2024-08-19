@@ -73,7 +73,7 @@ call plug#end()
 " Подключение конфига плагинов
 lua require('plugins.nvimtreeplug.main')
 lua require('plugins.vimbookmarks.main')
-
+lua require('plugins.vimairline.main')
 
 set number "Номера строк
 set cursorline     " Подсветка текущей строки
@@ -102,7 +102,6 @@ endif
 
 set background=light      " Установить светлую тему
 colorscheme solarized
-let g:airline_theme='gruvbox'        " Настройка Airline для работы с Gruvbox (если используете vim-airline)
 
 " Дополнительные настройки для улучшения отображения UI
 hi Normal guibg=NONE ctermbg=NONE  " Убрать фон
@@ -137,53 +136,6 @@ let g:blamer_delay = 0
 let g:blamer_prefix = ' > '
 highlight Blamer guifg=#928374
 
-" Настройки vim-airline
-
-" Активировать vim-airline
-let g:airline#extensions#tabline#enabled = 0         " Включить табы сверху
-
-" Показ числа вкладок и буферов
-let g:airline#extensions#tabline#show_tabs = 1       " Показать вкладки
-let g:airline#extensions#tabline#show_buffers = 1    " Показать буферы
-let g:airline#extensions#tabline#show_splits = 0     " Не показывать сплиты
-let g:airline#extensions#tabline#show_tab_nr = 1     " Показать номер вкладки
-let g:airline#extensions#tabline#show_close_button = 1 " Показать кнопку закрытия вкладки
-
-" Использовать powerline шрифты
-let g:airline_powerline_fonts = 1                    " Включить шрифты powerline
-
-" Параметры отображения информации
-let g:airline#extensions#whitespace#enabled = 1      " Показать пробелы, табы и т.п.
-let g:airline#extensions#branch#enabled = 1          " Показать информацию о ветке Git
-let g:airline#extensions#hunks#enabled = 1           " Показать информацию о хлипах Git
-let g:airline#extensions#ale#enabled = 1             " Интеграция с ALE для проверок синтаксиса
-let g:airline#extensions#coc#enabled = 1             " Интеграция с CoC
-
-" Цветовая тема Airline
-let g:airline_theme='sol'
-
-" Укорочение имени буфера - включить
-let g:airline#extensions#tabline#fnamecollapse = 1
-
-" Горячие клавиши для работы с vim-airline
-
-" Переключение между буферами
-nnoremap <silent> <C-Left> :bp<CR>     " Перейти на предыдущий буфер
-nnoremap <silent> <C-Rigt> :bn<CR>    " Перейти на следующий буфер
-
-" Открытие файлов во вкладках
-nnoremap <silent> <C-t> :tabnew<CR>    " Открыть новый таб
-
-" Переключение между вкладками
-nmap <silent> <C-h> :tabprevious<CR>  " Перейти на предыдущую вкладку
-nmap <silent> <C-l> :tabnext<CR>      " Перейти на следующую вкладку
-
-" Закрытие вкладок
-nnoremap <silent> <C-w> :tabclose<CR>  " Закрыть текущую вкладку
-
-" Перемещение вкладок
-nnoremap <silent> <C-Shift-Left> :tabmove -1<CR>   " Переместить текущую вкладку влево
-nnoremap <silent> <C-Shift-Right> :tabmove +1<CR>  " Переместить текущую вкладку вправо
 "Моя шпаргалка
 lua require('h')
 
