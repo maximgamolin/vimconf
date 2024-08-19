@@ -294,7 +294,7 @@ call quickui#menu#install("Git",[
         \ ['Blame', 'Git blame', ''],
         \ ['Ветки', 'MerginalToggle', ''],
         \ ['История', 'Telescope git_commits', ''],
-        \ ['История файла', 'Telescope git_bcommits', ''],
+        \ ['История файла', 'call GitLogForFile()', ''],
         \ ['История выделенного', 'call GitLogForVisualRange()', ''],
 \])
 
@@ -338,11 +338,22 @@ function! GitLogForVisualRange()
   let l:start = line("'<")
   let l:end = line("'>")
   let l:file = expand('%:p')
-  let l:file = expand('%:p')
   let l:relative_path = FindGitRelativePath(l:file)
 
   " Create the command string with --graph option
   let l:cmd = 'Git log -L ' . l:start . ',' . l:end . ':' . l:relative_path . ' --graph'
+
+  " Execute the command
+  execute l:cmd
+endfunction
+
+function! GitLogForFile()
+  " Функция для показа всей истории файла через гит лог
+  let l:file = expand('%:p')
+  let l:relative_path = FindGitRelativePath(l:file)
+
+  " Create the command string with --graph option
+  let l:cmd = 'Git log --stat -p '. l:relative_path
 
   " Execute the command
   execute l:cmd
