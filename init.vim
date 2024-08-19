@@ -2,7 +2,6 @@
 " Для python установить debugpy
 call plug#begin()
 "Цветовая схема
-Plug 'morhetz/gruvbox'
 Plug 'maxmx03/solarized.nvim'
 "Полоска снизу
 Plug 'vim-airline/vim-airline'
@@ -103,11 +102,6 @@ endif
 
 set background=light      " Установить светлую тему
 colorscheme solarized
-"colorscheme gruvbox        " Активировать Gruvbox
-" Настройки цветовой схемы Gruvbox
-let g:gruvbox_contrast_light='soft'  " Установить контраст для светлой темы (может быть 'hard', 'soft' или 'medium')
-let g:gruvbox_invert_selection='0'   " Не инвертировать цвет выделения
-let g:gruvbox_sign_column='bg0'      " Установить цвет столбца знаков
 let g:airline_theme='gruvbox'        " Настройка Airline для работы с Gruvbox (если используете vim-airline)
 
 " Дополнительные настройки для улучшения отображения UI
