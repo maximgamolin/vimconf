@@ -70,6 +70,27 @@ Plug 'nvim-tree/nvim-tree.lua'
 Plug 'MattesGroeger/vim-bookmarks'
 call plug#end()
 
+lua <<EOF
+-- функция для считывания файла с переменными окружения
+local function load_env_vars(filepath)
+    local file = io.open(filepath, "r")
+    if not file then
+        vim.api.nvim_err_writeln("Could not open file: " .. filepath)
+        return
+    end
+    
+    for line in file:lines() do
+        for key, value in string.gmatch(line, "([%w_]+)=([%w%p]+)") do
+            vim.fn.setenv(key, value)
+        end
+    end
+    
+    file:close()
+end
+load_env_vars(vim.fn.getcwd() .. "/env")
+EOF
+
+
 set number "Номера строк
 set cursorline     " Подсветка текущей строки
 set showcmd        " Показ текущей команды
@@ -148,28 +169,6 @@ nnoremap <F8> :TagbarToggle<CR>
 
 
 lua <<EOF
--- функция для считывания файла с переменными окружения
-local function load_env_vars(filepath)
-    local file = io.open(filepath, "r")
-    if not file then
-        vim.api.nvim_err_writeln("Could not open file: " .. filepath)
-        return
-    end
-    
-    for line in file:lines() do
-        for key, value in string.gmatch(line, "([%w_]+)=([%w%p]+)") do
-            vim.fn.setenv(key, value)
-        end
-    end
-    
-    file:close()
-end
-load_env_vars(vim.fn.getcwd() .. "/env")
-
-
-
-
-
 -- LSP
 require("mason").setup()
 require("mason-lspconfig").setup {
