@@ -52,6 +52,12 @@ call quickui#menu#install('H&elp', [
 			\ ['&Summary', 'help summary', ''],
 			\ ], 10000)
 
+call quickui#menu#install("&Window",[
+        \ ['Разделить по вертикали', 'vsp', ''],
+        \ ['Разделить по горизонтали', 'sp', ''],
+\])
+
+
 call quickui#menu#install("&Run",[
         \ ['Terminal', 'FloatermNew --height=0.2 --width=1.00 --wintype=split --position=bottom', ''],
         \ ['Close Terminal', "FloatermKill"],
