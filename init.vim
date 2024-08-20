@@ -70,17 +70,6 @@ Plug 'nvim-tree/nvim-tree.lua'
 Plug 'MattesGroeger/vim-bookmarks'
 call plug#end()
 
-" Подключение конфига плагинов
-lua require('h') 
-lua require('plugins.nvimtreeplug.main')
-lua require('plugins.vimbookmarks.main')
-lua require('plugins.vimairline.main')
-lua require('plugins.blamer.main')
-lua require('plugins.vimfloaterm.main')
-
-" Подключение меню должно быть последним
-source ~/.config/nvim/vim/plugins/menu/main.vim
-
 set number "Номера строк
 set cursorline     " Подсветка текущей строки
 set showcmd        " Показ текущей команды
@@ -115,6 +104,25 @@ hi LineNr guifg=#d3b58d            " Цвет номеров строк
 hi CursorLineNr guifg=#fabd2f      " Цвет номера строки под курсором
 hi Comment guifg=#7c6f64           " Цвет комментариев
 
+" Стили которые должны идти до
+lua require('style.main')
+" Подключение конфига плагинов
+
+lua require('h') 
+lua require('plugins.nvimtreeplug.main')
+lua require('plugins.vimbookmarks.main')
+lua require('plugins.vimairline.main')
+lua require('plugins.blamer.main')
+lua require('plugins.vimfloaterm.main')
+lua require('plugins.ibl.main')
+lua require('plugins.nvimtreesitter.main')
+source ~/.config/nvim/vim/functions/git/main.vim
+" Подключение меню должно быть последним/предпоследним
+source ~/.config/nvim/vim/plugins/menu/main.vim
+
+" Стили которые должны идти последними
+lua require('style.treesitter')
+
 " DAP горячие клавиши
 
 nnoremap <silent> <leader>db :lua require('dap').toggle_breakpoint()<CR>
@@ -137,65 +145,7 @@ nnoremap <F8> :TagbarToggle<CR>
 
 
 
-"Цвета для пробелов при цветных отступах
 
-highlight RainbowRedSpace guibg=#FCE3D6
-highlight RainbowYellowSpace guibg=#F8F4DE
-highlight RainbowBlueSpace guibg=#F2EEE4
-highlight RainbowOrangeSpace guibg=#FCF0DC
-highlight RainbowGreenSpace guibg=#EEF3DF
-highlight RainbowVioletSpace guibg=#FCE3D6
-highlight RainbowCyanSpace guibg=#EEF3DF
-
-highlight link PySyntaxKwargs Green
-
-
-function! FindGitRelativePath(file)
-  " Поиск ближайший папки гит от файла
-  let l:current_dir = fnamemodify(a:file, ':h')
-  let l:git_dir = ''
-
-  while l:current_dir != '/' && l:git_dir == ''
-    if isdirectory(l:current_dir . '/.git')
-      let l:git_dir = l:current_dir
-    else
-      let l:current_dir = fnamemodify(l:current_dir, ':h')
-    endif
-  endwhile
-
-  if l:git_dir == ''
-    echo "Error: .git directory not found"
-    return ''
-  endif
-
-  return substitute(a:file, l:git_dir . '/', '', '')
-endfunction
-
-function! GitLogForVisualRange()
-  " Функция для показа куска истории через гит лог
-  let l:start = line("'<")
-  let l:end = line("'>")
-  let l:file = expand('%:p')
-  let l:relative_path = FindGitRelativePath(l:file)
-
-  " Create the command string with --graph option
-  let l:cmd = 'Git log -L ' . l:start . ',' . l:end . ':' . l:relative_path . ' --graph'
-
-  " Execute the command
-  execute l:cmd
-endfunction
-
-function! GitLogForFile()
-  " Функция для показа всей истории файла через гит лог
-  let l:file = expand('%:p')
-  let l:relative_path = FindGitRelativePath(l:file)
-
-  " Create the command string with --graph option
-  let l:cmd = 'Git log --stat -p '. l:relative_path
-
-  " Execute the command
-  execute l:cmd
-endfunction
 
 lua <<EOF
 -- функция для считывания файла с переменными окружения
@@ -217,151 +167,6 @@ end
 load_env_vars(vim.fn.getcwd() .. "/env")
 
 
-
--- Настройка цветных отступов
-local highlight = {
-    "RainbowRed",
-    "RainbowYellow",
-    "RainbowBlue",
-    "RainbowOrange",
-    "RainbowGreen",
-    "RainbowViolet",
-    "RainbowCyan",
-}
-
-local hooks = require("ibl.hooks")
-hooks.register(hooks.type.HIGHLIGHT_SETUP, function()
-    vim.api.nvim_set_hl(0, "RainbowRed", { fg = "#E06C75" })
-    vim.api.nvim_set_hl(0, "RainbowYellow", { fg = "#E5C07B" })
-    vim.api.nvim_set_hl(0, "RainbowBlue", { fg = "#61AFEF" })
-    vim.api.nvim_set_hl(0, "RainbowOrange", { fg = "#D19A66" })
-    vim.api.nvim_set_hl(0, "RainbowGreen", { fg = "#98C379" })
-    vim.api.nvim_set_hl(0, "RainbowViolet", { fg = "#C678DD" })
-    vim.api.nvim_set_hl(0, "RainbowCyan", { fg = "#56B6C2" })
-end)
-
-require("ibl").setup({indent = {highlight = highlight},whitespace = {highlight = {"RainbowRedSpace", "RainbowYellowSpace", "RainbowBlueSpace", "RainbowGreenSpace", "RainbowVioletSpace", "RainbowCyanSpace"}}})
-
--- Настройки для treesitter
-require'nvim-treesitter.configs'.setup {
-  -- A list of parser names, or "all" (the listed parsers MUST always be installed)
-  --ensure_installed = { "python", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline" },
-
-  -- Automatically install missing parsers when entering buffer
-  -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-  -- auto_install = true,
-
-  refactor = {
-    highlight_definitions = {
-      enable = true,            -- Включение выделения объявления
-      clear_on_cursor_move = true, -- Очистка выделения при движении курсора
-    },
-    highlight_current_scope = {
-      enable = false             -- Выделение текущей области (опционально)
-    },
-    smart_rename = {
-      enable = true,
-      -- Assign keymaps to false to disable them, e.g. `smart_rename = false`.
-      keymaps = {
-        smart_rename = "grr",
-      },
-    },
-    navigation = {
-      enable = true,
-      -- Assign keymaps to false to disable them, e.g. `goto_definition = false`.
-      keymaps = {
-        goto_definition = "gnd",
-        list_definitions = "gnD",
-        list_definitions_toc = "gO",
-        goto_next_usage = "<a-*>",
-        goto_previous_usage = "<a-#>",
-      },
-    },
-  },
-  ensure_installed = {"python",},
-  highlight = {
-    enable = true,
-    additional_vim_regex_highlighting = false,
-    custom_captures = {
-            ["parameter.self"] = "@parameter.self",
-            ["parameter.cls"] = "@parameter.cls",
-        },
-
-    playground = {
-      enable = true,
-      disable = {},
-      updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
-      persist_queries = false, -- Whether the query persists across vim sessions
-      keybindings = {
-        toggle_query_editor = 'o',
-        toggle_hl_groups = 'i',
-        toggle_injected_languages = 't',
-        toggle_anonymous_nodes = 'a',
-        toggle_language_display = 'I',
-        focus_language = 'f',
-        unfocus_language = 'F',
-        update = 'R',
-        goto_node = '<cr>',
-        show_help = '?',
-      },
-    }
-  }
-}
-
-
--- Настройки пользовательских захватов через Lua
--- local query = require("vim.treesitter.query")
-
--- query.set("python", "highlights", [[
--- ((identifier) @parameter.self (#eq? @parameter.self "self"))
--- ((identifier) @parameter.cls (#eq? @parameter.cls "cls"))
--- ]])
-
-
--- Кастомные цвета для ключевых слов
--- vim.api.nvim_set_hl(0, "@variable.parameter", { fg = "#8f3f71" })
-
--- vim.api.nvim_set_hl(0, "@keyword.return", { fg = "#689d6a", bold = true })
--- vim.api.nvim_set_hl(0, "@keyword", { bold = true })
-
--- Настройка цветов для элементов Tree-sitter
-local set_highlight = function(group, opts)
-    vim.api.nvim_set_hl(0, group, opts)
-end
-
--- Настройка для различных языковых элементов.
-set_highlight("@keyword", {fg = "#859900", bg = "NONE"})  -- Ключевые слова
-set_highlight("@keyword.function", {fg = "#859900", bg = "NONE"})  -- def
-set_highlight("@keyword.return", {fg = "#4F96b3", bg = "NONE"})  -- return
-set_highlight("@keyword.import", {fg = "#859900", bg = "NONE"})  -- import
-set_highlight("@function", {fg = "#d33682", bg = "NONE"})  -- Функции
-set_highlight("@function.method", {fg = "#d33682", bg = "NONE"})  -- Методы
-set_highlight("@function.method.call", {fg = "#657b83", bg = "NONE"})  -- Вызщов функций объектов
-set_highlight("@function.call", {fg = "#657b83", bg = "NONE"})  -- Вызов простых функций
-set_highlight("@variable", {fg = "#657b83", bg = "NONE"})  -- Переменные
-set_highlight("@variable.builtin", {fg = "#657b83", bg = "NONE"})  -- Встроенные переменные
-set_highlight("@variable.member", {fg = "#657b83", bg = "NONE"})  -- Члены переменных (например, поля объектов)
-set_highlight("@call.arg.parameter", {fg = "#a85ba3", bg = "NONE"})  -- Именованные параметры при вызове функции
-set_highlight("@string", {fg = "#2aa198", bg = "NONE"})  -- Строки
-set_highlight("@string.documentation", {fg = "#93a1a1", bg = "NONE"})  -- Многостраничная документация
-set_highlight("@comment", {fg = "#93a1a1", bg = "NONE", italic = true})  -- Комментарии
-set_highlight("@constant", {fg = "#657b83", bg = "NONE"})  -- Константы
-set_highlight("@number", {fg = "#d33682", bg = "NONE"})  -- Числа
-set_highlight("@parameter", {fg = "#b58900", bg = "NONE"})  -- Параметры функции
-set_highlight("@constructor", {fg = "#657b83", bg = "NONE"})  -- Конструкторы, и __init__ и инициализация класа
-set_highlight("@type", {fg = "#657b83", bg = "NONE"})  -- Типы данных в том числе определения классов
--- Отдельный цвет для self, cls и doubledash методов параметров методов в Python
-set_highlight("@parameter.self", {fg = "#6c71c4", bg = "NONE", italic = true})  -- self (фиолетовый)
-set_highlight("@parameter.cls", {fg = "#d33682", bg = "NONE", italic = true})  -- cls (розовый италик)
-set_highlight("@doubledash.method", {fg = "#268bd2", bg = "NONE"})  -- машические методы
-set_highlight("@decorator.call", {fg = "#b58900", bg = "NONE"})  -- Вызов декоратора
-
-
--- Дополнительные настройки для улучшенного восприятия
-set_highlight("Normal", {fg = "#586e75", bg = "#fdf6e3"})  -- Общий текст
-set_highlight("LineNr", {fg = "#93a1a1", bg = "#eee8d5"})  -- Номера строк
-set_highlight("CursorLineNr", {fg = "#586e75", bg = "#eee8d5"})  -- Текущий номер строки
-set_highlight("Visual", {fg="#fdf6e5", bg = "#869496"})  -- Цвет выделения
 
 
 
