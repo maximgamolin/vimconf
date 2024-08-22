@@ -90,6 +90,7 @@ end
 load_env_vars(vim.fn.getcwd() .. "/env")
 EOF
 
+autocmd InsertLeave * write " Автоматически сохранять документ по выходу из режима вставки
 
 set number "Номера строк
 set cursorline     " Подсветка текущей строки
