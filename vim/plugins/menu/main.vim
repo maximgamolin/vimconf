@@ -81,6 +81,8 @@ call quickui#menu#install("Git",[
 "Контекстное меню (как по правой кнопке)
 let contextMenu = [
       \ ['Toggle bookmark',     ':BookmarkToggle'],
+      \ ['--', ''],
+      \ ['Set breakpoint', "lua require'dap'.toggle_breakpoint()"]
       \ ]
 let opts = {'index':g:quickui#context#cursor}
 
