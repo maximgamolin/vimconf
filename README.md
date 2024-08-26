@@ -8,7 +8,13 @@
 [ ] Добавить проверку flake8 для python
 [ ] Проблема с количеством отступов не в python файлах
 [ ] Добавить автоматическое форматирование кода
-[ ] Добавить спелл чекер русского и английского языка
+[*] Добавить спелл чекер русского и английского языка
+mkdir -p ~/.local/share/nvim/site/spell
+cd ~/.local/share/nvim/site/spell
+curl -k -O https://ftp.vim.org/pub/vim/runtime/spell/en.utf-8.spl
+curl -k -O https://ftp.vim.org/pub/vim/runtime/spell/en.utf-8.sug
+curl -k -O https://ftp.vim.org/pub/vim/runtime/spell/ru.utf-8.spl
+curl -k -O https://ftp.vim.org/pub/vim/runtime/spell/ru.utf-8.sug
 [ ] При ошибке в языке, не менять текст на красный, а подчеркивать проблемный участок кода
 [ ] Если переменная нигде не используетя6 делать ее серой
 [ ] Научиться красить линии в nvim-tree (*)

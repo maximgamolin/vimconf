@@ -119,7 +119,11 @@ endif
 
 set background=light      " Установить светлую тему
 colorscheme solarized
+" Включаем проверку орфографии
+set spell
 
+" Устанавливаем языки для проверки
+set spelllang=en,ru
 " Дополнительные настройки для улучшения отображения UI
 hi Normal guibg=NONE ctermbg=NONE  " Убрать фон
 hi LineNr guifg=#d3b58d            " Цвет номеров строк
