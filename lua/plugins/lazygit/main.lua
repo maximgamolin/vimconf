@@ -1,8 +1,10 @@
 -- lazygit — интерактивный git UI в плавающем окне
 -- Зависимость: brew install lazygit
 
--- Открыть lazygit
-vim.keymap.set('n', '<leader>lg', '<cmd>LazyGit<CR>', { noremap = true, silent = true, desc = 'lazygit' })
+-- Открыть lazygit через FloatermNew (надёжнее, чем :LazyGit при вызове из меню)
+function LazyGitOpen()
+  vim.cmd('FloatermNew --width=0.92 --height=0.92 --title=lazygit --autoclose=1 lazygit')
+end
 
 -- Commit & Push: запрашивает сообщение, делает git add -A + commit + push
 function LazyGitCommitPush()
@@ -18,3 +20,5 @@ function LazyGitCommitPush()
   )
   vim.cmd(cmd)
 end
+
+vim.keymap.set('n', '<leader>lg', '<cmd>lua LazyGitOpen()<CR>', { noremap = true, silent = true, desc = 'lazygit' })
