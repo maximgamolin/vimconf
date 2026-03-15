@@ -44,17 +44,17 @@ call quickui#menu#install("&Option", [
 
 " AI меню (вес 9000 — перед Help)
 call quickui#menu#install('&AI', [
-        \ ['Открыть / скрыть Claude\tAlt+`', 'lua ClaudeToggle()', ''],
-        \ ['Новая вкладка Claude',            'lua ClaudeNewTab()', ''],
+        \ ['Открыть / скрыть Claude\t(\\ac)', 'ClaudeCode', ''],
+        \ ['Фокус на Claude\t(\\af)',          'ClaudeCodeFocus', ''],
         \ ['--', ''],
-        \ ['Следующая вкладка',               'lua ClaudeNextTab()', ''],
-        \ ['Предыдущая вкладка',              'lua ClaudePrevTab()', ''],
-        \ ['Закрыть вкладку',                 'lua ClaudeCloseTab()', ''],
+        \ ['Продолжить сессию\t(\\ar)',        'ClaudeCode --resume', ''],
+        \ ['Продолжить задачу\t(\\aC)',        'ClaudeCode --continue', ''],
+        \ ['Выбрать модель',                   'ClaudeCodeSelectModel', ''],
         \ ['--', ''],
-        \ ['Добавить файл в контекст',        'ClaudeCodeAdd', ''],
+        \ ['Добавить файл в контекст\t(\\ab)', 'ClaudeCodeAdd %', ''],
         \ ['--', ''],
-        \ ['Принять изменения',               'ClaudeCodeDiffAccept', ''],
-        \ ['Отклонить изменения',             'ClaudeCodeDiffDeny', ''],
+        \ ['Принять изменения\t(\\aa)',        'ClaudeCodeDiffAccept', ''],
+        \ ['Отклонить изменения\t(\\ad)',      'ClaudeCodeDiffDeny', ''],
         \ ], 9000)
 
 " register HELP menu with weight 10000

@@ -38,7 +38,8 @@ Plug 'idanarye/vim-merginal'
 Plug 'APZelos/blamer.nvim'
 " lazygit — интерактивный UI для git (требует: brew install lazygit)
 Plug 'kdheepak/lazygit.nvim'
-" Claude Code интеграция
+" Claude Code интеграция (требует: claude CLI)
+Plug 'folke/snacks.nvim'
 Plug 'coder/claudecode.nvim'
 " LSP, DAP, Linters protocol manager
 Plug 'williamboman/mason.nvim'
