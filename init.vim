@@ -36,6 +36,8 @@ Plug 'mhinz/vim-signify'
 Plug 'idanarye/vim-merginal'
 " Git lens
 Plug 'APZelos/blamer.nvim'
+" lazygit — интерактивный UI для git (требует: brew install lazygit)
+Plug 'kdheepak/lazygit.nvim'
 " LSP, DAP, Linters protocol manager
 Plug 'williamboman/mason.nvim'
 " LSP
@@ -167,6 +169,7 @@ lua require('plugins.ibl.main')
 lua require('plugins.nvimtreesitter.main')
 lua require('plugins.rainbow.main')
 lua require('plugins.markid.main')
+lua require('plugins.lazygit.main')
 source ~/.config/nvim/vim/functions/git/main.vim
 " Подключение меню должно быть последним/предпоследним
 source ~/.config/nvim/vim/plugins/menu/main.vim

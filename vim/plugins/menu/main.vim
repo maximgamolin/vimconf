@@ -71,6 +71,9 @@ call quickui#menu#install("&Run",[
         \ ["Debug selection in visual mode\t(\\ds)", "lua require('dap-python').debug_selection()", ''],
 \])
 call quickui#menu#install("Git",[
+        \ ['Commit', 'LazyGit', ''],
+        \ ['Commit && Push', 'lua LazyGitCommitPush()', ''],
+        \ ['--', ''],
         \ ['Blame', 'Git blame', ''],
         \ ['Ветки', 'MerginalToggle', ''],
         \ ['История', 'Telescope git_commits', ''],
