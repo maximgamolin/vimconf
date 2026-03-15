@@ -38,6 +38,8 @@ Plug 'idanarye/vim-merginal'
 Plug 'APZelos/blamer.nvim'
 " lazygit — интерактивный UI для git (требует: brew install lazygit)
 Plug 'kdheepak/lazygit.nvim'
+" Claude Code интеграция
+Plug 'coder/claudecode.nvim'
 " LSP, DAP, Linters protocol manager
 Plug 'williamboman/mason.nvim'
 " LSP
@@ -153,6 +155,7 @@ lua require('plugins.nvimtreesitter.main')
 lua require('plugins.rainbow.main')
 lua require('plugins.markid.main')
 lua require('plugins.lazygit.main')
+lua require('plugins.claudecode.main')
 " После полной загрузки — подгружаем цвета дерева из nvim_settings.ini
 lua vim.api.nvim_create_autocmd('VimEnter', { once = true, callback = function() require('plugins.nvimtreeplug.dir_highlight').load_from_settings() end })
 source ~/.config/nvim/vim/functions/git/main.vim

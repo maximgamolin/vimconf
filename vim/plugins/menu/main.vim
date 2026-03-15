@@ -42,6 +42,21 @@ call quickui#menu#install("&Option", [
 			\ ['Set &Paste %{&paste? "Off":"On"}', 'set paste!'],
 			\ ])
 
+" AI меню (вес 9000 — перед Help)
+call quickui#menu#install('&AI', [
+        \ ['Открыть / скрыть Claude\tAlt+`', 'lua ClaudeToggle()', ''],
+        \ ['Новая вкладка Claude',            'lua ClaudeNewTab()', ''],
+        \ ['--', ''],
+        \ ['Следующая вкладка',               'lua ClaudeNextTab()', ''],
+        \ ['Предыдущая вкладка',              'lua ClaudePrevTab()', ''],
+        \ ['Закрыть вкладку',                 'lua ClaudeCloseTab()', ''],
+        \ ['--', ''],
+        \ ['Добавить файл в контекст',        'ClaudeCodeAdd', ''],
+        \ ['--', ''],
+        \ ['Принять изменения',               'ClaudeCodeDiffAccept', ''],
+        \ ['Отклонить изменения',             'ClaudeCodeDiffDeny', ''],
+        \ ], 9000)
+
 " register HELP menu with weight 10000
 call quickui#menu#install('H&elp', [
 			\ ["&Cheatsheet", 'lua Hlp()', ''],
