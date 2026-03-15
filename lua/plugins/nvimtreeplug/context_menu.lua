@@ -6,23 +6,38 @@ local _node = nil
 function M.open()
   local api = require('nvim-tree.api')
   local node = api.tree.get_node_under_cursor()
-  if not node or not node.absolute_path or node.type == 'directory' then
+  if not node or not node.absolute_path then
     return
   end
 
   _node = node
 
-  local items = {
-    { 'Открыть',                           "lua require('plugins.nvimtreeplug.context_menu').action('open')" },
-    { 'Открыть в новой вкладке',           "lua require('plugins.nvimtreeplug.context_menu').action('tab')" },
-    { 'Разделить экран и открыть',         "lua require('plugins.nvimtreeplug.context_menu').action('split')" },
+  local create_items = {
     { '--', '' },
-    { 'Скопировать название файла',        "lua require('plugins.nvimtreeplug.context_menu').action('copy_name')" },
-    { 'Скопировать путь от корня проекта', "lua require('plugins.nvimtreeplug.context_menu').action('copy_rel')" },
-    { 'Скопировать полный путь на диске',  "lua require('plugins.nvimtreeplug.context_menu').action('copy_abs')" },
-    { '--', '' },
-    { 'Добавить в гит',                    "lua require('plugins.nvimtreeplug.context_menu').action('git_add')" },
+    { 'Создать файл',  "lua require('plugins.nvimtreeplug.context_menu').action('create_file')" },
+    { 'Создать папку', "lua require('plugins.nvimtreeplug.context_menu').action('create_dir')" },
   }
+
+  local items
+  if node.type == 'directory' then
+    items = create_items
+  else
+    items = {
+      { 'Открыть',                           "lua require('plugins.nvimtreeplug.context_menu').action('open')" },
+      { 'Открыть в новой вкладке',           "lua require('plugins.nvimtreeplug.context_menu').action('tab')" },
+      { 'Разделить экран и открыть',         "lua require('plugins.nvimtreeplug.context_menu').action('split')" },
+      { '--', '' },
+      { 'Скопировать название файла',        "lua require('plugins.nvimtreeplug.context_menu').action('copy_name')" },
+      { 'Скопировать путь от корня проекта', "lua require('plugins.nvimtreeplug.context_menu').action('copy_rel')" },
+      { 'Скопировать полный путь на диске',  "lua require('plugins.nvimtreeplug.context_menu').action('copy_abs')" },
+      { '--', '' },
+      { 'Добавить в гит',                    "lua require('plugins.nvimtreeplug.context_menu').action('git_add')" },
+      { 'Частично добавить в гит',           "lua require('plugins.nvimtreeplug.context_menu').action('git_add_patch')" },
+    }
+    for _, v in ipairs(create_items) do
+      table.insert(items, v)
+    end
+  end
 
   vim.fn['quickui#context#open'](items, vim.empty_dict())
 end
@@ -30,13 +45,39 @@ end
 function M.action(act)
   if not _node then return end
   local full_path = _node.absolute_path
+  local node_type = _node.type
   local filename = vim.fn.fnamemodify(full_path, ':t')
   local relative_path = vim.fn.fnamemodify(full_path, ':.')
   _node = nil
 
   local escaped = vim.fn.fnameescape(full_path)
 
-  if act == 'open' then
+  -- Базовая директория: для папки — сама папка, для файла — её родитель
+  local base_dir = node_type == 'directory' and full_path or vim.fn.fnamemodify(full_path, ':h')
+
+  if act == 'create_file' then
+    local name = vim.fn.input('Имя файла: ', '', 'file')
+    if name == '' then return end
+    local target = base_dir .. '/' .. name
+    local parent = vim.fn.fnamemodify(target, ':h')
+    vim.fn.mkdir(parent, 'p')
+    -- Создаём файл если не существует
+    if vim.fn.filereadable(target) == 0 then
+      local f = io.open(target, 'w')
+      if f then f:close() end
+    end
+    require('nvim-tree.api').tree.reload()
+    vim.notify('Создан файл: ' .. target)
+    return
+  elseif act == 'create_dir' then
+    local name = vim.fn.input('Имя папки: ', '', 'file')
+    if name == '' then return end
+    local target = base_dir .. '/' .. name
+    vim.fn.mkdir(target, 'p')
+    require('nvim-tree.api').tree.reload()
+    vim.notify('Создана папка: ' .. target)
+    return
+  elseif act == 'open' then
     vim.cmd('wincmd l')
     vim.cmd('edit ' .. escaped)
   elseif act == 'tab' then
@@ -60,6 +101,20 @@ function M.action(act)
     else
       vim.notify('Ошибка: ' .. result, vim.log.levels.ERROR)
     end
+  elseif act == 'git_add_patch' then
+    -- Открываем git add -p в плавающем терминале, после закрытия — reload дерева
+    vim.cmd(
+      'FloatermNew --width=0.85 --height=0.85 --title=git\\ add\\ -p --autoclose=1 ' ..
+      'git -c color.ui=always add -p ' .. vim.fn.shellescape(full_path)
+    )
+    -- Обновляем дерево когда floaterm закроется
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'FloatermClose',
+      once = true,
+      callback = function()
+        require('nvim-tree.api').tree.reload()
+      end,
+    })
   end
 end
 
