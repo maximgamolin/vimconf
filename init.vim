@@ -159,7 +159,9 @@ hi Comment guifg=#88999b           " Цвет комментариев (DEFAULT_
 lua require('style.main')
 " Подключение конфига плагинов
 
-lua require('h') 
+lua require('h')
+" Загружаем настройки проекта (VIRTUAL_ENV, цвета дерева) из nvim_settings.ini
+lua require('project_settings').load()
 lua require('plugins.nvimtreeplug.main')
 lua require('plugins.vimbookmarks.main')
 lua require('plugins.vimairline.main')
@@ -170,6 +172,8 @@ lua require('plugins.nvimtreesitter.main')
 lua require('plugins.rainbow.main')
 lua require('plugins.markid.main')
 lua require('plugins.lazygit.main')
+" После полной загрузки — подгружаем цвета дерева из nvim_settings.ini
+lua vim.api.nvim_create_autocmd('VimEnter', { once = true, callback = function() require('plugins.nvimtreeplug.dir_highlight').load_from_settings() end })
 source ~/.config/nvim/vim/functions/git/main.vim
 " Подключение меню должно быть последним/предпоследним
 source ~/.config/nvim/vim/plugins/menu/main.vim
