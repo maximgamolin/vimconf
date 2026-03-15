@@ -94,10 +94,28 @@ end
 load_env_vars(vim.fn.getcwd() .. "/env")
 EOF
 
-autocmd InsertLeave * write " Автоматически сохранять документ по выходу из режима вставки
+augroup autosave
+  autocmd!
+  " Сохранять при выходе из режима вставки и после изменений в normal mode
+  autocmd InsertLeave,TextChanged * if &modifiable && !&readonly && bufname('%') != '' | silent! write | endif
+  " Сохранять при потере фокуса (переключение окна/приложения)
+  autocmd FocusLost * if &modifiable && !&readonly && bufname('%') != '' | silent! write | endif
+augroup end
 
 set mouse=a    " Включить поддержку мыши (перетаскивание границ окон)
+set clipboard=unnamedplus  " Синхронизировать буфер yank с системным буфером обмена
+
+" Command+C — копировать выделение в буфер обмена (работает в GUI/Neovide)
+vnoremap <D-c> "+y
+nnoremap <D-c> "+yy
 set number "Номера строк
+
+" Сворачивание кода через treesitter (как + в PyCharm)
+set foldmethod=expr
+set foldexpr=nvim_treesitter#foldexpr()
+set foldlevelstart=99  " По умолчанию всё раскрыто при открытии файла
+set foldenable
+set foldcolumn=1       " Показывать колонку со значками + слева от номеров строк
 set cursorline     " Подсветка текущей строки
 set showcmd        " Показ текущей команды
 set wildmenu       " Включить меню авто-дополнения
