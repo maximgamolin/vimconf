@@ -4,13 +4,13 @@ local api = require('nvim-tree.api')
 
 local NS = vim.api.nvim_create_namespace('nvimtree_dir_hl')
 
--- Пастельные цвета (фон, адаптированы под solarized dark)
+-- Пастельные цвета (фон, адаптированы под solarized light)
 local COLORS = {
-  { key = 'purple', label = 'Фиолетовый', hl = 'NvimTreeDirHL_purple', bg = '#3d2b4e' },
-  { key = 'green',  label = 'Зелёный',    hl = 'NvimTreeDirHL_green',  bg = '#1e3b20' },
-  { key = 'teal',   label = 'Бирюзовый',  hl = 'NvimTreeDirHL_teal',   bg = '#1a3535' },
-  { key = 'orange', label = 'Оранжевый',  hl = 'NvimTreeDirHL_orange', bg = '#3b2a14' },
-  { key = 'pink',   label = 'Розовый',    hl = 'NvimTreeDirHL_pink',   bg = '#3b1e28' },
+  { key = 'purple', label = 'Фиолетовый', hl = 'NvimTreeDirHL_purple', bg = '#e8d8f5' },
+  { key = 'green',  label = 'Зелёный',    hl = 'NvimTreeDirHL_green',  bg = '#d5edd5' },
+  { key = 'teal',   label = 'Бирюзовый',  hl = 'NvimTreeDirHL_teal',   bg = '#cce8e8' },
+  { key = 'orange', label = 'Оранжевый',  hl = 'NvimTreeDirHL_orange', bg = '#f5e6cc' },
+  { key = 'pink',   label = 'Розовый',    hl = 'NvimTreeDirHL_pink',   bg = '#f5d5e0' },
 }
 
 for _, c in ipairs(COLORS) do
