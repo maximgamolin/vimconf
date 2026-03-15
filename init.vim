@@ -62,6 +62,10 @@ Plug 'ryanoasis/vim-devicons' " Дев иконки везде
 Plug 'preservim/nerdcommenter'
 " Закрывать парные скобки
 Plug 'windwp/nvim-autopairs'
+" Радужные скобки
+Plug 'HiPhish/rainbow-delimiters.nvim'
+" Подсветка одинаковых переменных одним цветом
+Plug 'David-Kunz/markid'
 " Вкладки сверху
 Plug 'akinsho/bufferline.nvim', { 'tag': '*' }
 " Дерево файлов
@@ -92,6 +96,7 @@ EOF
 
 autocmd InsertLeave * write " Автоматически сохранять документ по выходу из режима вставки
 
+set mouse=a    " Включить поддержку мыши (перетаскивание границ окон)
 set number "Номера строк
 set cursorline     " Подсветка текущей строки
 set showcmd        " Показ текущей команды
@@ -126,9 +131,9 @@ set spell
 set spelllang=en,ru
 " Дополнительные настройки для улучшения отображения UI
 hi Normal guibg=NONE ctermbg=NONE  " Убрать фон
-hi LineNr guifg=#d3b58d            " Цвет номеров строк
-hi CursorLineNr guifg=#fabd2f      " Цвет номера строки под курсором
-hi Comment guifg=#7c6f64           " Цвет комментариев
+hi LineNr guifg=#a3adab            " Цвет номеров строк (LINE_NUMBERS_COLOR)
+hi CursorLineNr guifg=#677d85      " Цвет номера строки под курсором (LINE_NUMBER_ON_CARET_ROW_COLOR)
+hi Comment guifg=#88999b           " Цвет комментариев (DEFAULT_LINE_COMMENT)
 
 " Стили которые должны идти до
 lua require('style.main')
@@ -142,6 +147,8 @@ lua require('plugins.blamer.main')
 lua require('plugins.vimfloaterm.main')
 lua require('plugins.ibl.main')
 lua require('plugins.nvimtreesitter.main')
+lua require('plugins.rainbow.main')
+lua require('plugins.markid.main')
 source ~/.config/nvim/vim/functions/git/main.vim
 " Подключение меню должно быть последним/предпоследним
 source ~/.config/nvim/vim/plugins/menu/main.vim
@@ -163,6 +170,7 @@ nnoremap <leader>ff <cmd>Telescope find_files<cr>
 nnoremap <leader>fg <cmd>Telescope live_grep<cr>
 nnoremap <leader>fb <cmd>Telescope buffers<cr>
 nnoremap <leader>fh <cmd>Telescope help_tags<cr>
+nnoremap <M-F> <cmd>Telescope live_grep<cr>
 " Открыть локальную историю
 nnoremap <F5> :UndotreeToggle<CR>
 " Открыть бар с функциями и классами
@@ -209,16 +217,15 @@ end
 require('telescope').setup{
   defaults = {
     vimgrep_arguments = {
-      'rg', 
-      '--color=never', 
-      '--no-heading', 
-      '--with-filename', 
-      '--line-number', 
-      '--column', 
+      'rg',
+      '--color=never',
+      '--no-heading',
+      '--with-filename',
+      '--line-number',
+      '--column',
       '--smart-case',
-      '--hidden',
     },
-    file_ignore_patterns = {"*.pyc", "__pycache__", "venv*"},
+    file_ignore_patterns = {"%.pyc$", "__pycache__", "venv", "^%.", "/%."},
     layout_config = {
       horizontal = {
         preview_width = 0.4,
@@ -258,23 +265,7 @@ local function get_root_dir(fname)
     return lspconfig.util.root_pattern(unpack(root_files))(fname) or
            lspconfig.util.path.dirname(fname)
 end
-  lspconfig.pyright.setup({
-  on_attach = function(client, bufnr)
-    local buf_map = function(bufnr, mode, lhs, rhs, opts)
-      opts = vim.tbl_extend("force", {noremap=true, silent=true}, opts or {})
-      vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, opts)
-    end
-
-    -- Переход к определению (Ctrl+])
-    buf_map(bufnr, "n", "<C-]>", "<cmd>lua vim.lsp.buf.definition()<CR>")
-
-    -- Возвращение обратно (Ctrl+o)
-    buf_map(bufnr, "n", "<C-o>", "<C-o>")
-
-    -- Список использований функции или класса (Ctrl+])
-    buf_map(bufnr, "n", "<C-r>", "<cmd>lua require('telescope.builtin').lsp_references()<CR>")
-  end,
-})
+  -- pyright настраивается ниже, в блоке с venv
 
   -- nvim-cmp setup
   local source_mapping = {
@@ -361,24 +352,39 @@ end
 
   })
   -- LSP setup for Python
-  local servers = { 'pyright' } -- Add other servers if needed
   local venv_path = tostring(vim.fn.getenv('VIRTUAL_ENV'))
-print('Python virtual env: ' .. venv_path)
-  for _, lsp in ipairs(servers) do
-    local settings = {}
-    if lsp == 'pyright' and venv_path ~= '' then
-      settings = {
-        python = {
-          pythonPath = venv_path
-        }
+  print('Python virtual env: ' .. venv_path)
+  local python_settings = {}
+  if venv_path ~= '' and venv_path ~= 'NIL' then
+    -- pythonPath должен указывать на бинарник интерпретатора, а не на папку venv
+    python_settings = {
+      python = {
+        pythonPath = venv_path .. '/bin/python'
       }
-    end
-    lspconfig[lsp].setup({
-      root_dir = get_root_dir,
-      capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities()),
-      settings = settings,
-    })
+    }
   end
+  lspconfig.pyright.setup({
+    root_dir = get_root_dir,
+    capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities()),
+    settings = python_settings,
+    on_attach = function(client, bufnr)
+      local buf_map = function(bufnr, mode, lhs, rhs, opts)
+        opts = vim.tbl_extend("force", {noremap=true, silent=true}, opts or {})
+        vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, opts)
+      end
+
+      -- Переход к определению: Ctrl+] и Option+Click
+      buf_map(bufnr, "n", "<C-]>", "<cmd>lua vim.lsp.buf.definition()<CR>")
+      buf_map(bufnr, "n", "<M-LeftMouse>", "<LeftMouse><cmd>lua require('telescope.builtin').lsp_references()<CR>")
+
+      -- Навигация назад/вперёд по истории переходов (как Cmd+[ / Cmd+] в PyCharm)
+      buf_map(bufnr, "n", "<M-[>", "<C-o>")  -- Option+[ = назад
+      buf_map(bufnr, "n", "<M-]>", "<C-i>")  -- Option+] = вперёд
+
+      -- Список использований функции или класса
+      buf_map(bufnr, "n", "<C-r>", "<cmd>lua require('telescope.builtin').lsp_references()<CR>")
+    end,
+  })
 
   -- Настройка посветки определений функции и класса 
   vim.cmd [[
@@ -460,6 +466,54 @@ EOF
 
 "Настройка telescope + fzf
 lua require('telescope').load_extension('fzy_native')
+
+lua <<EOF
+vim.keymap.set('n', '<C-S-f>', function()
+  vim.ui.input({ prompt = 'Расширение файлов (*.py, *.lua, пусто = все): ' }, function(pattern)
+    if pattern == nil then return end
+    local opts = {}
+    if pattern ~= '' then
+      opts.glob_pattern = pattern
+    end
+    require('telescope.builtin').live_grep(opts)
+  end)
+end)
+
+-- Ctrl+Enter: перейти к объявлению, или если уже на объявлении — показать использования
+vim.keymap.set('n', '<C-CR>', function()
+  local params = vim.lsp.util.make_position_params()
+  local current_file = vim.api.nvim_buf_get_name(0)
+  local current_line = vim.fn.line('.') - 1
+
+  vim.lsp.buf_request(0, 'textDocument/definition', params, function(err, result, ctx)
+    if err or not result or (type(result) == 'table' and vim.tbl_isempty(result)) then
+      require('telescope.builtin').lsp_references()
+      return
+    end
+
+    local def = type(result) == 'table' and result[1] or result
+    local def_uri = def.uri or def.targetUri
+    local def_range = def.range or def.targetSelectionRange or def.targetRange
+    local def_file = vim.uri_to_fname(def_uri)
+    local def_line = def_range.start.line
+
+    if def_file == current_file and def_line == current_line then
+      require('telescope.builtin').lsp_references()
+    else
+      -- Используем уже полученный результат вместо второго LSP-запроса
+      local client = vim.lsp.get_client_by_id(ctx.client_id)
+      local offset_encoding = client and client.offset_encoding or 'utf-8'
+      vim.lsp.util.jump_to_location(def, offset_encoding)
+    end
+  end)
+end)
+EOF
+
+" Переключение между окнами через Alt+стрелки
+nnoremap <A-Left>  <C-w>h
+nnoremap <A-Down>  <C-w>j
+nnoremap <A-Up>    <C-w>k
+nnoremap <A-Right> <C-w>l
 
 " Настройка сроллбара
 augroup ScrollbarInit

@@ -12,6 +12,13 @@ vim.opt.termguicolors = true
 
 
 require("nvim-tree").setup({
+  on_attach = function(bufnr)
+    local api = require('nvim-tree.api')
+    api.config.mappings.default_on_attach(bufnr)
+    vim.keymap.set('n', '<Space>', function()
+      require('plugins.nvimtreeplug.context_menu').open()
+    end, { buffer = bufnr, noremap = true, silent = true, desc = 'Контекстное меню файла' })
+  end,
   sort = {
     sorter = "case_sensitive",
   },
