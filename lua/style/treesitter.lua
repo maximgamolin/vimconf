@@ -15,7 +15,7 @@ set_highlight("@function.method.call",   {fg = "#586e76", bg = "NONE"})         
 set_highlight("@function.call",          {fg = "#586e76", bg = "NONE"})              -- Вызов простых функций
 set_highlight("@variable",               {fg = "#586e76", bg = "NONE"})              -- Переменные (DEFAULT_IDENTIFIER)
 set_highlight("@variable.builtin",       {fg = "#9e9200", bg = "NONE"})              -- Встроенные: len, print, range... (PY.BUILTIN_NAME)
-set_highlight("@variable.member",        {fg = "#6c71c4", bg = "NONE"})              -- Поля объектов self.x (DEFAULT_INSTANCE_FIELD)
+set_highlight("@variable.member",        {fg = "#586e76", bg = "NONE"})              -- Поля объектов self.x
 set_highlight("@call.arg.parameter",     {fg = "#a85ba3", bg = "NONE"})              -- Именованные параметры при вызове (PY.KEYWORD_ARGUMENT)
 set_highlight("@string",                 {fg = "#2aa198", bg = "NONE"})              -- Строки (DEFAULT_STRING / PY.STRING)
 set_highlight("@string.documentation",   {fg = "#88999b", bg = "NONE", italic=true}) -- Докстроки (DEFAULT_DOC_COMMENT)
