@@ -12,6 +12,17 @@ function M.open()
 
   _node = node
 
+  local hl = require('plugins.nvimtreeplug.dir_highlight')
+  local color_items = { { '--', '' } }
+  for _, c in ipairs(hl.get_colors()) do
+    table.insert(color_items, {
+      'Выделить: ' .. c.label,
+      "lua require('plugins.nvimtreeplug.dir_highlight').mark('" .. c.key .. "')",
+    })
+  end
+  table.insert(color_items, { 'Снять выделение',      "lua require('plugins.nvimtreeplug.dir_highlight').clear_node()" })
+  table.insert(color_items, { 'Снять все выделения',  "lua require('plugins.nvimtreeplug.dir_highlight').clear_all()" })
+
   local create_items = {
     { '--', '' },
     { 'Создать файл',  "lua require('plugins.nvimtreeplug.context_menu').action('create_file')" },
@@ -20,7 +31,9 @@ function M.open()
 
   local items
   if node.type == 'directory' then
-    items = create_items
+    items = {}
+    for _, v in ipairs(color_items) do table.insert(items, v) end
+    for _, v in ipairs(create_items) do table.insert(items, v) end
   else
     items = {
       { 'Открыть',                           "lua require('plugins.nvimtreeplug.context_menu').action('open')" },
@@ -34,9 +47,8 @@ function M.open()
       { 'Добавить в гит',                    "lua require('plugins.nvimtreeplug.context_menu').action('git_add')" },
       { 'Частично добавить в гит',           "lua require('plugins.nvimtreeplug.context_menu').action('git_add_patch')" },
     }
-    for _, v in ipairs(create_items) do
-      table.insert(items, v)
-    end
+    for _, v in ipairs(color_items) do table.insert(items, v) end
+    for _, v in ipairs(create_items) do table.insert(items, v) end
   end
 
   vim.fn['quickui#context#open'](items, vim.empty_dict())
