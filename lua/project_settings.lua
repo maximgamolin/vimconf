@@ -91,26 +91,91 @@ local function to_abs(rel_path)
   return M.project_root() .. '/' .. rel_path
 end
 
--- Загружает настройки: применяет VIRTUAL_ENV, возвращает { abs_path -> color_key }
-function M.load()
-  local path = M.settings_path()
-  local data = parse(path)
-
-  -- Применяем переменные окружения
-  local env = data['env'] or {}
-  if env.VIRTUAL_ENV and env.VIRTUAL_ENV ~= '' then
-    vim.fn.setenv('VIRTUAL_ENV', env.VIRTUAL_ENV)
-    vim.fn.setenv('VIRTUAL_ENV_PYTHON', env.VIRTUAL_ENV .. '/bin/python')
-    vim.notify('[project_settings] VIRTUAL_ENV: ' .. env.VIRTUAL_ENV)
+-- Парсит .env файл → { key = value }
+-- Поддерживает: KEY=val, KEY="val", KEY='val', export KEY=val, # комментарии
+local function parse_dotenv(path)
+  local vars = {}
+  local f = io.open(path, 'r')
+  if not f then return vars end
+  for line in f:lines() do
+    line = line:match('^%s*(.-)%s*$')
+    if line ~= '' and not line:match('^#') then
+      -- снять `export ` в начале
+      line = line:gsub('^export%s+', '')
+      local k, v = line:match('^([%w_]+)=(.*)$')
+      if k and v then
+        -- снять кавычки
+        v = v:match('^"(.*)"$') or v:match("^'(.*)'$") or v
+        vars[k] = v
+      end
+    end
   end
+  f:close()
+  return vars
+end
+
+-- Собирает все env-переменные из nvim_settings.ini [env] и .env файла
+-- Возвращает { key = value }
+function M.collect_env()
+  local result = {}
+
+  -- .env файл (меньший приоритет)
+  local dotenv_path = M.project_root() .. '/.env'
+  for k, v in pairs(parse_dotenv(dotenv_path)) do
+    result[k] = v
+  end
+
+  -- nvim_settings.ini [env] (перезаписывает .env)
+  local ini_env = parse(M.settings_path())['env'] or {}
+  for k, v in pairs(ini_env) do
+    result[k] = v
+  end
+
+  return result
+end
+
+-- Применяет env-переменные в текущий процесс nvim (наследуются новыми терминалами)
+local function apply_env(vars)
+  for k, v in pairs(vars) do
+    vim.fn.setenv(k, v)
+  end
+  -- VIRTUAL_ENV_PYTHON — удобный алиас
+  if vars.VIRTUAL_ENV then
+    vim.fn.setenv('VIRTUAL_ENV_PYTHON', vars.VIRTUAL_ENV .. '/bin/python')
+    vim.notify('[project_settings] VIRTUAL_ENV: ' .. vars.VIRTUAL_ENV)
+  end
+end
+
+-- Загружает настройки: применяет env, возвращает { abs_path -> color_key }
+function M.load()
+  local vars = M.collect_env()
+  apply_env(vars)
 
   -- Возвращаем цвета дерева { absolute_path -> color_key }
   local colors = {}
+  local data = parse(M.settings_path())
   for rel, color_key in pairs(data['tree_colors'] or {}) do
     colors[to_abs(rel)] = color_key
   end
   return colors
 end
+
+-- При открытии нового floaterm — экспортируем переменные в его оболочку
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'FloatermOpen',
+  callback = function()
+    local vars = M.collect_env()
+    if vim.tbl_isempty(vars) then return end
+    -- Собираем одну строку с несколькими export и отправляем в терминал
+    local exports = {}
+    for k, v in pairs(vars) do
+      -- Экранируем одинарные кавычки в значении
+      local safe_v = v:gsub("'", "'\\''")
+      table.insert(exports, string.format("export %s='%s'", k, safe_v))
+    end
+    vim.cmd('FloatermSend ' .. table.concat(exports, ' && '))
+  end,
+})
 
 -- Сохраняет цвет директории
 function M.save_color(abs_path, color_key)
