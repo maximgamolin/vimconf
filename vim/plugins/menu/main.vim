@@ -107,8 +107,9 @@ let opts = {'index':g:quickui#context#cursor}
 " enable to display tips in the cmdline
 let g:quickui_show_tip = 1
 
-" Открыть менб
+" Открыть меню
 noremap <space><space> :call quickui#menu#open()<cr>
+nnoremap <silent> <RightMouse> :call quickui#menu#open()<cr>
 nnoremap <silent> <leader>m :call quickui#context#open(contextMenu, opts)<CR>
 
 
