@@ -74,6 +74,11 @@ call quickui#menu#install('H&elp', [
 call quickui#menu#install("&Window",[
         \ ['Разделить по вертикали', 'vsp', ''],
         \ ['Разделить по горизонтали', 'sp', ''],
+        \ ['--', ''],
+        \ ['Закрыть вкладку',            'bd', ''],
+        \ ['Закрыть все кроме текущей',  'lua local cur = vim.api.nvim_get_current_buf(); for _, b in ipairs(vim.api.nvim_list_bufs()) do if b ~= cur and vim.bo[b].buflisted then vim.cmd("bd " .. b) end end', ''],
+        \ ['Следующая вкладка',          'bnext', ''],
+        \ ['Предыдущая вкладка',         'bprev', ''],
 \])
 
 
@@ -113,7 +118,6 @@ let g:quickui_show_tip = 1
 
 " Открыть меню
 noremap <space><space> :call quickui#menu#open()<cr>
-nnoremap <silent> <RightMouse> :call quickui#menu#open()<cr>
 nnoremap <silent> <leader>m :call quickui#context#open(contextMenu, opts)<CR>
 
 

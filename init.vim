@@ -453,15 +453,7 @@ end
 require("dapui").setup()
 
 -- Вкладки сверху
-require("bufferline").setup{
-  options = {
-    right_mouse_command = function(bufnr)
-      -- Переключаемся на нужный буфер и открываем меню
-      vim.api.nvim_set_current_buf(bufnr)
-      vim.cmd('call quickui#menu#open()')
-    end,
-  }
-}
+require("bufferline").setup{}
 
 -- Функция для вывода всех загруженных сниппетов
 local function print_snippets()
