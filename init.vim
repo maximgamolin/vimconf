@@ -79,6 +79,8 @@ Plug 'nvim-tree/nvim-tree.lua'
 Plug 'MattesGroeger/vim-bookmarks'
 call plug#end()
 
+" Работа хоткеев при русской раскладке (langmap)
+set langmap=ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz
 
 augroup autosave
   autocmd!
