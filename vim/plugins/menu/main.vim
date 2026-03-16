@@ -13,6 +13,10 @@ call quickui#menu#install('&File', [
             \ [ "--", '' ],
             \ [ "Close menu", "call quickui#menu#close()", ""],
             \ [ "E&xit\tAlt+x", 'echo 6' ],
+            \ [ "--", '' ],
+            \ [ "Скопировать название файла",        'lua vim.fn.setreg("+", vim.fn.expand("%:t")); vim.notify("Скопировано: " .. vim.fn.expand("%:t"))' ],
+            \ [ "Скопировать путь от корня проекта", 'lua vim.fn.setreg("+", vim.fn.expand("%:.")); vim.notify("Скопировано: " .. vim.fn.expand("%:."))' ],
+            \ [ "Скопировать полный путь на диске",  'lua vim.fn.setreg("+", vim.fn.expand("%:p")); vim.notify("Скопировано: " .. vim.fn.expand("%:p"))' ],
             \ ])
 
 " items containing tips, tips will display in the cmdline
