@@ -416,6 +416,7 @@ end
       -- Переход к определению: Ctrl+] и Option+Click
       buf_map(bufnr, "n", "<C-]>", "<cmd>lua vim.lsp.buf.definition()<CR>")
       buf_map(bufnr, "n", "<M-LeftMouse>", "<LeftMouse><cmd>lua require('telescope.builtin').lsp_references()<CR>")
+      buf_map(bufnr, "n", "<C-LeftMouse>", "<LeftMouse><C-CR>")
 
       -- Навигация назад/вперёд по истории переходов (как Cmd+[ / Cmd+] в PyCharm)
       buf_map(bufnr, "n", "<M-[>", "<C-o>")  -- Option+[ = назад
