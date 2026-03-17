@@ -72,6 +72,8 @@ call quickui#menu#install('H&elp', [
 			\ ], 10000)
 
 call quickui#menu#install("&Window",[
+        \ ['Toggle дерево файлов', 'NvimTreeToggle', ''],
+        \ ['--', ''],
         \ ['Разделить по вертикали', 'vsp', ''],
         \ ['Разделить по горизонтали', 'sp', ''],
         \ ['--', ''],
