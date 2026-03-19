@@ -160,20 +160,30 @@ function M.load()
   return colors
 end
 
--- При открытии нового floaterm — экспортируем переменные в его оболочку
+-- При открытии нового floaterm — экспортируем переменные и активируем venv
 vim.api.nvim_create_autocmd('User', {
   pattern = 'FloatermOpen',
   callback = function()
     local vars = M.collect_env()
     if vim.tbl_isempty(vars) then return end
-    -- Собираем одну строку с несколькими export и отправляем в терминал
-    local exports = {}
+
+    local commands = {}
+
+    -- export всех переменных
     for k, v in pairs(vars) do
-      -- Экранируем одинарные кавычки в значении
       local safe_v = v:gsub("'", "'\\''")
-      table.insert(exports, string.format("export %s='%s'", k, safe_v))
+      table.insert(commands, string.format("export %s='%s'", k, safe_v))
     end
-    vim.cmd('FloatermSend ' .. table.concat(exports, ' && '))
+
+    -- Активируем venv если есть VIRTUAL_ENV и файл activate существует
+    if vars.VIRTUAL_ENV then
+      local activate = vars.VIRTUAL_ENV .. '/bin/activate'
+      if vim.fn.filereadable(activate) == 1 then
+        table.insert(commands, 'source ' .. activate)
+      end
+    end
+
+    vim.cmd('FloatermSend ' .. table.concat(commands, ' && '))
   end,
 })
 
