@@ -34,7 +34,8 @@ require("nvim-tree").setup({
     
   },
   filters = {
-    dotfiles = true,
+    dotfiles = false,
+    custom = { '__pycache__' },
   },
 })
 -- не могу нормально настроить цветовые отметки в дереве
