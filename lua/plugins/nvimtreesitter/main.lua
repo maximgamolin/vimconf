@@ -1,67 +1,29 @@
--- Настройки для treesitter
-require'nvim-treesitter.configs'.setup {
-  -- A list of parser names, or "all" (the listed parsers MUST always be installed)
-  --ensure_installed = { "python", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline" },
+-- Настройки для treesitter (ветка main — новый API без nvim-treesitter.configs)
 
-  -- Automatically install missing parsers when entering buffer
-  -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-  -- auto_install = true,
+-- Отключаем тяжёлую подсветку на больших файлах, иначе скролл дёргается
+local function is_big_file(bufnr)
+  local name = vim.api.nvim_buf_get_name(bufnr)
+  local ok, stats = pcall(vim.uv.fs_stat, name)
+  return (ok and stats and stats.size > 256 * 1024)
+    or vim.api.nvim_buf_line_count(bufnr) > 8000
+end
 
-  refactor = {
-    highlight_definitions = {
-      enable = true,            -- Включение выделения объявления
-      clear_on_cursor_move = true, -- Очистка выделения при движении курсора
-    },
-    highlight_current_scope = {
-      enable = false             -- Выделение текущей области (опционально)
-    },
-    smart_rename = {
-      enable = true,
-      -- Assign keymaps to false to disable them, e.g. `smart_rename = false`.
-      keymaps = {
-        smart_rename = "grr",
-      },
-    },
-    navigation = {
-      enable = true,
-      -- Assign keymaps to false to disable them, e.g. `goto_definition = false`.
-      keymaps = {
-        goto_definition = "gnd",
-        list_definitions = "gnD",
-        list_definitions_toc = "gO",
-        goto_next_usage = "<a-*>",
-        goto_previous_usage = "<a-#>",
-      },
-    },
-  },
-  ensure_installed = {"python",},
-  highlight = {
-    enable = true,
-    additional_vim_regex_highlighting = false,
-    custom_captures = {
-            ["parameter.self"] = "@parameter.self",
-            ["parameter.cls"] = "@parameter.cls",
-        },
+-- Установка парсеров (аналог ensure_installed из старого API):
+-- вызов асинхронный, уже установленные пропускает
+require('nvim-treesitter').install({ 'python', 'markdown', 'markdown_inline' })
 
-    playground = {
-      enable = true,
-      disable = {},
-      updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
-      persist_queries = false, -- Whether the query persists across vim sessions
-      keybindings = {
-        toggle_query_editor = 'o',
-        toggle_hl_groups = 'i',
-        toggle_injected_languages = 't',
-        toggle_anonymous_nodes = 'a',
-        toggle_language_display = 'I',
-        focus_language = 'f',
-        unfocus_language = 'F',
-        update = 'R',
-        goto_node = '<cr>',
-        show_help = '?',
-      },
-    }
-  }
-}
+-- На ветке main подсветка не включается сама — включаем её на каждый буфер,
+-- для которого есть парсер (vim.treesitter.start кидает ошибку, если парсера
+-- нет — pcall её глушит). Легаси-синтаксис nvim отключает автоматически.
+vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup('treesitter_highlight', { clear = true }),
+  callback = function(ev)
+    if not is_big_file(ev.buf) then
+      pcall(vim.treesitter.start, ev.buf)
+    end
+  end,
+})
 
-
+-- Кастомные captures (@parameter.self, @doubledash.method и т.д.) приходят из
+-- queries/python/highlights.scm, а их цвета — из lua/style/treesitter.lua;
+-- на ветке main это работает без настройки custom_captures.

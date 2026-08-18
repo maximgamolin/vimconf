@@ -15,11 +15,9 @@ Plug 'voldikss/vim-floaterm'
 "Меню
 Plug 'skywind3000/vim-quickui'
 "Подствека синтаксиса
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-"Смотреть в коде какой элемент за что отвечает, чтобы настроить потом
-"подстветку
-Plug 'nvim-treesitter/playground'
-Plug 'nvim-treesitter/nvim-treesitter-refactor' " Подсветка переменных в области видимости
+Plug 'nvim-treesitter/nvim-treesitter', {'branch': 'main', 'do': ':TSUpdate'}
+"Смотреть в коде какой элемент за что отвечает — встроенные :InspectTree и :Inspect
+"(плагин playground архивирован, refactor заменён LSP-командами grr/gnd)
 "Телескоп для поиска
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.8' }
@@ -69,14 +67,18 @@ Plug 'preservim/nerdcommenter'
 Plug 'windwp/nvim-autopairs'
 " Радужные скобки
 Plug 'HiPhish/rainbow-delimiters.nvim'
-" Подсветка одинаковых переменных одним цветом
-Plug 'David-Kunz/markid'
+" Подсветка одинаковых переменных одним цветом — теперь локальный модуль
+" lua/plugins/markid (плагин David-Kunz/markid зависел от старого фреймворка
+" nvim-treesitter и с веткой main не работает)
 " Вкладки сверху
 Plug 'akinsho/bufferline.nvim', { 'tag': '*' }
 " Дерево файлов
+Plug 'nvim-tree/nvim-web-devicons' " Иконки файлов по расширению для nvim-tree
 Plug 'nvim-tree/nvim-tree.lua'
 " Закладки в коде
 Plug 'MattesGroeger/vim-bookmarks'
+" Рендер markdown прямо в буфере
+Plug 'MeanderingProgrammer/render-markdown.nvim'
 call plug#end()
 
 " Работа хоткеев при русской раскладке (langmap)
@@ -119,23 +121,27 @@ augroup autosave
 augroup end
 
 set mouse=a    " Включить поддержку мыши (перетаскивание границ окон)
+set mousescroll=ver:1,hor:6  " Колесо скроллит по 1 строке вместо 3 — плавнее
+set smoothscroll   " Прокрутка по экранным строкам (длинные строки не «прыгают»)
 set clipboard=unnamedplus  " Синхронизировать буфер yank с системным буфером обмена
 
 " Command+C — копировать выделение в буфер обмена (работает в GUI/Neovide)
 vnoremap <D-c> "+y
 nnoremap <D-c> "+yy
 set number "Номера строк
+set laststatus=3 " Одна общая нижняя панель на всё окно вместо отдельной на каждый сплит
+set noshowmode " Не печатать «-- ВИЗУАЛЬНЫЙ РЕЖИМ --» в командной строке — режим и так виден в airline
 
 " Сворачивание кода через treesitter (как + в PyCharm)
 set foldmethod=expr
-set foldexpr=nvim_treesitter#foldexpr()
+set foldexpr=v:lua.vim.treesitter.foldexpr()
 set foldlevelstart=99  " По умолчанию всё раскрыто при открытии файла
 set foldenable
 set foldcolumn=1       " Показывать колонку со значками + слева от номеров строк
 set cursorline     " Подсветка текущей строки
 set showcmd        " Показ текущей команды
 set wildmenu       " Включить меню авто-дополнения
-set updatetime=100 " Настройка для signifity
+set updatetime=250 " Для signify и LSP document_highlight (100 давало лишние LSP-запросы при движении)
 set expandtab "Пробелы вместо табуляци
 
 set hlsearch "Подсветка поиска
@@ -187,11 +193,14 @@ lua require('plugins.rainbow.main')
 lua require('plugins.markid.main')
 lua require('plugins.lazygit.main')
 lua require('plugins.claudecode.main')
+lua require('plugins.rendermarkdown.main')
 " После полной загрузки — подгружаем цвета дерева из nvim_settings.ini
 lua vim.api.nvim_create_autocmd('VimEnter', { once = true, callback = function() require('plugins.nvimtreeplug.dir_highlight').load_from_settings() end })
 source ~/.config/nvim/vim/functions/git/main.vim
 " Подключение меню должно быть последним/предпоследним
 source ~/.config/nvim/vim/plugins/menu/main.vim
+" Строка меню постоянно видна сверху (в tabline), вкладки — строкой ниже
+lua require('plugins.menu_tabline').setup()
 
 " Стили которые должны идти последними
 lua require('style.treesitter')
@@ -225,7 +234,7 @@ lua <<EOF
 -- LSP
 require("mason").setup()
 require("mason-lspconfig").setup {
-    ensure_installed = { "lua_ls", "pyright", "bashls", "cmake", "cssls", "dockerls", "docker_compose_language_service", "autotools_ls", "markdown_oxide", "nginx_language_server", "pyright", "sqlls", "taplo", "lemminx", "yamlls" }
+    ensure_installed = { "lua_ls", "pyright", "bashls", "cmake", "cssls", "dockerls", "docker_compose_language_service", "autotools_ls", "markdown_oxide", "nginx_language_server", "sqlls", "taplo", "lemminx", "yamlls" }
 }
 
 -- LSP автодополнения
@@ -298,12 +307,13 @@ require'lsp_signature'.setup({
 
 -- Require necessary modules
 local cmp = require('cmp')
-local lspconfig = require('lspconfig')
-  
--- Функция для определения корневой директории
-local function get_root_dir(fname)
-    return lspconfig.util.root_pattern(unpack(root_files))(fname) or
-           lspconfig.util.path.dirname(fname)
+
+-- Корневая директория проекта: ближайший предок с одним из root_files,
+-- иначе — директория самого файла (как root_pattern + dirname из старого
+-- require('lspconfig'), который удалён в пользу нативного vim.lsp.config)
+local function get_root_dir(bufnr, on_dir)
+    local fname = vim.api.nvim_buf_get_name(bufnr)
+    on_dir(vim.fs.root(bufnr, root_files) or vim.fs.dirname(fname))
 end
   -- pyright настраивается ниже, в блоке с venv
 
@@ -403,7 +413,9 @@ end
       }
     }
   end
-  lspconfig.pyright.setup({
+  -- vim.lsp.config сливается с конфигом pyright из nvim-lspconfig;
+  -- запускает сервер mason-lspconfig (automatic_enable) при открытии буфера
+  vim.lsp.config('pyright', {
     root_dir = get_root_dir,
     capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities()),
     settings = python_settings,
@@ -424,6 +436,11 @@ end
 
       -- Список использований функции или класса
       buf_map(bufnr, "n", "<C-r>", "<cmd>lua require('telescope.builtin').lsp_references()<CR>")
+
+      -- Замена nvim-treesitter-refactor (архивирован, не работает с веткой main):
+      -- grr — переименование, gnd — переход к объявлению, теперь через LSP
+      buf_map(bufnr, "n", "grr", "<cmd>lua vim.lsp.buf.rename()<CR>")
+      buf_map(bufnr, "n", "gnd", "<cmd>lua vim.lsp.buf.definition()<CR>")
     end,
   })
 
