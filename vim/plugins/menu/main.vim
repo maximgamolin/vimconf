@@ -44,6 +44,8 @@ call quickui#menu#install("&Option", [
 			\ ['Set &Spell %{&spell? "Off":"On"}', 'set spell!'],
 			\ ['Set &Cursor Line %{&cursorline? "Off":"On"}', 'set cursorline!'],
 			\ ['Set &Paste %{&paste? "Off":"On"}', 'set paste!'],
+			\ ['--', ''],
+			\ ['Рендер &Markdown Toggle', 'RenderMarkdown buf_toggle', 'Включить/выключить рендер markdown в текущем файле'],
 			\ ])
 
 " AI меню (вес 9000 — перед Help)
@@ -92,7 +94,7 @@ call quickui#menu#install("&Run",[
         \ ['--', ''],
         \ ["Toggle breakpoint\t(\\db)", "lua require'dap'.toggle_breakpoint()", ''],
         \ ["Start\\Continue debug", "lua require'dap'.continue()", ''],
-        \ ["Debug closest test method\t(\\dm)", "lua require('dap-python').test_method()", ''], 
+        \ ["Debug closest test method\t(\\dm)", "lua require('dap-python').test_method()", ''],
         \ ["Debug closest test class\t(\\dc)", "lua require('dap-python').test_class()", ''],
         \ ["Debug selection in visual mode\t(\\ds)", "lua require('dap-python').debug_selection()", ''],
 \])
@@ -121,5 +123,4 @@ let g:quickui_show_tip = 1
 " Открыть меню
 noremap <space><space> :call quickui#menu#open()<cr>
 nnoremap <silent> <leader>m :call quickui#context#open(contextMenu, opts)<CR>
-
 
