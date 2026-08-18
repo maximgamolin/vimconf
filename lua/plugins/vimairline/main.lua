@@ -21,3 +21,26 @@ vim.g.airline_theme = 'sol'
 
 -- Укорочение имени буфера - включить
 vim.g['airline#extensions#tabline#fnamecollapse'] = 1
+
+-- Не даём airline подменять секции в терминальных буферах,
+-- иначе в окне Claude не видно наших секций (память, лимиты)
+vim.g['airline#extensions#term#enabled'] = 0
+
+-- vim-devicons загружается после init.vim и перезаписывает g:airline_section_y,
+-- затирая наши секции (память, лимиты) — отключаем его вмешательство в statusline
+vim.g.webdevicons_enable_airline_statusline = 0
+
+-- Свои секции: память процесса nvim + лимиты Claude (в окне Claude Code)
+require('plugins.vimairline.status_extras').setup()
+
+vim.cmd([[
+  function! AirlineNvimMem()
+    return v:lua.require('plugins.vimairline.status_extras').mem()
+  endfunction
+  function! AirlineClaudeLimits()
+    return v:lua.require('plugins.vimairline.status_extras').claude()
+  endfunction
+  call airline#parts#define_function('nvim_mem', 'AirlineNvimMem')
+  call airline#parts#define_function('claude_limits', 'AirlineClaudeLimits')
+  let g:airline_section_y = airline#section#create_right(['claude_limits', 'ffenc', 'nvim_mem'])
+]])

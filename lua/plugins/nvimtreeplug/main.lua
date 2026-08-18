@@ -24,14 +24,21 @@ require("nvim-tree").setup({
   },
   view = {
     width = 30,
-    number = true, -- Включить номера строк
+    number = false, -- Не показывать номера строк
   },
   renderer = {
     group_empty = true,
     indent_markers = {
       enable = true,  -- Показывать/скрывать маркеры отступов
     },
-    
+    icons = {
+      show = {
+        file = true,         -- Иконки файлов по расширению (nvim-web-devicons)
+        folder = true,
+        folder_arrow = true,
+        git = true,
+      },
+    },
   },
   filters = {
     dotfiles = false,
