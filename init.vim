@@ -451,14 +451,23 @@ end
     end,
   })
 
-  -- Настройка посветки определений функции и класса 
-  vim.cmd [[
-    augroup lsp_document_highlight
-      autocmd!
-      autocmd CursorHold,CursorHoldI * lua vim.lsp.buf.document_highlight()
-      autocmd CursorMoved,CursorMovedI * lua vim.lsp.buf.clear_references()
-    augroup END
-]]
+  -- Настройка посветки определений функции и класса
+  local lsp_highlight_group = vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
+  vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+    group = lsp_highlight_group,
+    callback = function(args)
+      -- Не все серверы (например, для markdown) поддерживают documentHighlight
+      if #vim.lsp.get_clients({ bufnr = args.buf, method = "textDocument/documentHighlight" }) > 0 then
+        vim.lsp.buf.document_highlight()
+      end
+    end,
+  })
+  vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+    group = lsp_highlight_group,
+    callback = function()
+      vim.lsp.buf.clear_references()
+    end,
+  })
 -- Автодополнения от нейронки (пока не работает)
 local cmp_ai = require('cmp_ai.config')
 
