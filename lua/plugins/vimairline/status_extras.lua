@@ -1,30 +1,55 @@
 -- Дополнительные секции для нижней панели (airline):
--- 1) память основного процесса nvim
--- 2) остатки лимитов Claude (сессия/неделя), когда активно окно Claude Code
+-- 1) память nvim и его дочерних процессов (LSP-серверы, терминалы и т.п.)
+-- 2) остатки лимитов Claude (сессия/неделя), когда окно Claude Code видно во вкладке
 local M = {}
 
 -- ===== Память процесса nvim =====
 
 local mem_str = ''
 
+local function fmt_kb(kb)
+  if kb >= 1024 * 1024 then
+    return string.format('%.1fG', kb / 1024 / 1024)
+  end
+  return string.format('%dM', math.floor(kb / 1024 + 0.5))
+end
+
 local function poll_mem()
-  vim.system({ 'ps', '-o', 'rss=', '-p', tostring(vim.fn.getpid()) }, { text = true }, function(res)
-    local rss_kb = tonumber((res.stdout or ''):match('%d+'))
-    if rss_kb then
-      local new_str
-      if rss_kb >= 1024 * 1024 then
-        new_str = string.format('%.1fG', rss_kb / 1024 / 1024)
-      else
-        new_str = string.format('%dM', math.floor(rss_kb / 1024 + 0.5))
+  local self_pid = vim.fn.getpid()
+  -- одна выборка всей таблицы процессов: из неё берём RSS самого nvim
+  -- и сумму по всему поддереву его потомков (LSP, терминалы и их процессы)
+  vim.system({ 'ps', '-Ao', 'pid=,ppid=,rss=' }, { text = true }, function(res)
+    local rss = {} -- pid -> rss в КБ
+    local children = {} -- ppid -> список pid
+    for line in (res.stdout or ''):gmatch('[^\n]+') do
+      local pid, ppid, kb = line:match('(%d+)%s+(%d+)%s+(%d+)')
+      if pid then
+        pid, ppid = tonumber(pid), tonumber(ppid)
+        rss[pid] = tonumber(kb)
+        children[ppid] = children[ppid] or {}
+        table.insert(children[ppid], pid)
       end
-      -- перерисовываем панель только при изменении значения — лишние
-      -- redrawstatus во время потокового вывода терминала оставляют артефакты
-      if new_str ~= mem_str then
-        mem_str = new_str
-        vim.schedule(function()
-          vim.cmd('redrawstatus')
-        end)
+    end
+    if not rss[self_pid] then
+      return
+    end
+    local kids_kb = 0
+    local stack = { self_pid }
+    while #stack > 0 do
+      local pid = table.remove(stack)
+      for _, child in ipairs(children[pid] or {}) do
+        kids_kb = kids_kb + (rss[child] or 0)
+        table.insert(stack, child)
       end
+    end
+    local new_str = fmt_kb(rss[self_pid]) .. '/' .. fmt_kb(kids_kb)
+    -- перерисовываем панель только при изменении значения — лишние
+    -- redrawstatus во время потокового вывода терминала оставляют артефакты
+    if new_str ~= mem_str then
+      mem_str = new_str
+      vim.schedule(function()
+        vim.cmd('redrawstatus')
+      end)
     end
   end)
 end
@@ -37,9 +62,8 @@ end
 
 local claude_str = ''
 
--- Активное окно — терминал Claude Code (snacks-терминал из claudecode.nvim)?
-local function in_claude_window()
-  local buf = vim.api.nvim_get_current_buf()
+-- Буфер — терминал Claude Code (snacks-терминал из claudecode.nvim)?
+local function is_claude_buf(buf)
   if vim.bo[buf].buftype ~= 'terminal' then
     return false
   end
@@ -47,8 +71,18 @@ local function in_claude_window()
   return name:find('claude', 1, true) ~= nil
 end
 
+-- Терминал Claude виден в текущей вкладке (в любом окне, не обязательно активном)?
+local function claude_visible()
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if is_claude_buf(vim.api.nvim_win_get_buf(win)) then
+      return true
+    end
+  end
+  return false
+end
+
 function M.claude()
-  if claude_str == '' or not in_claude_window() then
+  if claude_str == '' or not claude_visible() then
     return ''
   end
   return claude_str
@@ -98,7 +132,7 @@ function M.poll_claude()
   )
 end
 
--- Обновить лимиты, если данные старее минуты (вызывается при входе в окно Claude)
+-- Обновить лимиты, если данные старее минуты (вызывается при появлении окна Claude)
 local function poll_claude_throttled()
   if vim.uv.now() - last_poll > 60000 then
     M.poll_claude()
@@ -120,10 +154,10 @@ function M.setup()
     M.poll_claude()
   end))
 
-  -- при входе в окно Claude — обновить сразу (не чаще раза в минуту)
-  vim.api.nvim_create_autocmd({ 'BufEnter', 'TermEnter' }, {
+  -- когда терминал Claude виден во вкладке — обновить сразу (не чаще раза в минуту)
+  vim.api.nvim_create_autocmd({ 'BufWinEnter', 'BufEnter', 'TermEnter', 'TabEnter' }, {
     callback = function()
-      if in_claude_window() then
+      if claude_visible() then
         poll_claude_throttled()
       end
     end,
