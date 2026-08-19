@@ -411,6 +411,8 @@ end
   -- LSP setup for Python
   local venv_path = tostring(vim.fn.getenv('VIRTUAL_ENV'))
   print('Python virtual env: ' .. venv_path)
+  -- Проверка внешних программ (lazygit, lazydocker, ctags и т.д.)
+  require('deps_check').check()
   local python_settings = {}
   if venv_path ~= '' and venv_path ~= 'NIL' then
     -- pythonPath должен указывать на бинарник интерпретатора, а не на папку venv
