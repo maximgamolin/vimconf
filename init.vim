@@ -199,6 +199,7 @@ lua require('plugins.nvimtreesitter.main')
 lua require('plugins.rainbow.main')
 lua require('plugins.markid.main')
 lua require('plugins.lazygit.main')
+lua require('plugins.lazydocker.main')
 lua require('plugins.claudecode.main')
 lua require('plugins.rendermarkdown.main')
 " После полной загрузки — подгружаем цвета дерева из nvim_settings.ini

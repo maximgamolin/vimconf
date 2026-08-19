@@ -63,6 +63,11 @@ call quickui#menu#install('&AI', [
         \ ['Отклонить изменения\t(\\ad)',      'ClaudeCodeDiffDeny', ''],
         \ ], 9000)
 
+" Tools меню (вес 9500 — после AI, перед Help)
+call quickui#menu#install('&Tools', [
+        \ ["&Docker\t(\\ld)", 'lua LazyDockerOpen()', 'lazydocker: контейнеры, порты, логи, ресурсы'],
+        \ ], 9500)
+
 " register HELP menu with weight 10000
 call quickui#menu#install('H&elp', [
 			\ ["&Cheatsheet", 'lua Hlp()', ''],
