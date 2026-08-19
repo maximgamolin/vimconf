@@ -122,6 +122,7 @@ augroup end
 
 set mouse=a    " Включить поддержку мыши (перетаскивание границ окон)
 set mousescroll=ver:1,hor:6  " Колесо скроллит по 1 строке вместо 3 — плавнее
+set mousemodel=extend  " Правый клик доходит до обработчиков (меню вкладок), а не открывает встроенный popup
 set smoothscroll   " Прокрутка по экранным строкам (длинные строки не «прыгают»)
 set clipboard=unnamedplus  " Синхронизировать буфер yank с системным буфером обмена
 
@@ -518,7 +519,20 @@ end
 require("dapui").setup()
 
 -- Вкладки сверху
-require("bufferline").setup{}
+require("bufferline").setup{
+  options = {
+    -- левая кнопка — переключить вкладку в том окне, по чьим вкладкам кликнули
+    left_mouse_command = function(buf)
+      require('plugins.tab_context_menu').switch(buf)
+    end,
+    -- правая кнопка по вкладке — контекстное меню quickui вместо bdelete по умолчанию
+    right_mouse_command = function(buf)
+      require('plugins.tab_context_menu').open(buf)
+    end,
+  },
+}
+-- Кнопка «≡» на вкладках, открывающая то же меню по левому клику
+require('plugins.tab_context_menu').setup_button()
 
 -- Функция для вывода всех загруженных сниппетов
 local function print_snippets()
