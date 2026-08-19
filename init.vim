@@ -175,6 +175,13 @@ hi LineNr guifg=#a3adab            " Цвет номеров строк (LINE_NU
 hi CursorLineNr guifg=#677d85      " Цвет номера строки под курсором (LINE_NUMBER_ON_CARET_ROW_COLOR)
 hi Comment guifg=#88999b           " Цвет комментариев (DEFAULT_LINE_COMMENT)
 
+" Спеллчек: убрать зачёркивание у незнакомых слов, оставить только волнистое подчёркивание
+augroup SpellNoStrike
+  autocmd!
+  autocmd ColorScheme * hi SpellBad gui=undercurl cterm=undercurl guisp=#dc322f
+augroup END
+hi SpellBad gui=undercurl cterm=undercurl guisp=#dc322f
+
 " Стили которые должны идти до
 lua require('style.main')
 " Подключение конфига плагинов
