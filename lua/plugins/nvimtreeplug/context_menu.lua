@@ -27,6 +27,8 @@ function M.open()
     { '--', '' },
     { 'Создать файл',  "lua require('plugins.nvimtreeplug.context_menu').action('create_file')" },
     { 'Создать папку', "lua require('plugins.nvimtreeplug.context_menu').action('create_dir')" },
+    { '--', '' },
+    { 'Показать/скрыть дату и размер', "lua require('plugins.nvimtreeplug.file_info_decorator').toggle()" },
   }
 
   local items

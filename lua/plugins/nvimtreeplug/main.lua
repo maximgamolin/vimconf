@@ -11,6 +11,8 @@ vim.g.loaded_netrwPlugin = 1
 vim.opt.termguicolors = true
 
 
+local FileInfoDecorator = require('plugins.nvimtreeplug.file_info_decorator')
+
 require("nvim-tree").setup({
   on_attach = function(bufnr)
     local api = require('nvim-tree.api')
@@ -18,16 +20,22 @@ require("nvim-tree").setup({
     vim.keymap.set('n', '<Space>', function()
       require('plugins.nvimtreeplug.context_menu').open()
     end, { buffer = bufnr, noremap = true, silent = true, desc = 'Контекстное меню файла' })
+    -- Открытие узла одиночным кликом (по умолчанию нужен двойной клик).
+    -- <LeftRelease>, а не <LeftMouse>: к моменту отпускания курсор уже
+    -- переместился на строку, по которой кликнули.
+    vim.keymap.set('n', '<LeftRelease>', api.node.open.edit,
+      { buffer = bufnr, noremap = true, silent = true, desc = 'Открыть узел одним кликом' })
   end,
   sort = {
     sorter = "case_sensitive",
   },
   view = {
-    width = 30,
+    width = 45,
     number = false, -- Не показывать номера строк
   },
   renderer = {
     group_empty = true,
+    decorators = { "Git", "Open", "Hidden", "Modified", "Bookmark", "Diagnostics", "Copied", FileInfoDecorator, "Cut" },
     indent_markers = {
       enable = true,  -- Показывать/скрывать маркеры отступов
     },
