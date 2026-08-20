@@ -82,7 +82,17 @@ local function update_winbar(win)
   end
   local buf = vim.api.nvim_win_get_buf(win)
   local want = vim.bo[buf].buftype == '' and vim.bo[buf].buflisted
-  pcall(vim.api.nvim_set_option_value, 'winbar', want and WINBAR or '', { win = win })
+  if want then
+    pcall(vim.api.nvim_set_option_value, 'winbar', WINBAR, { win = win })
+    return
+  end
+  -- В не-файловых окнах убираем только СВОЙ winbar (вкладки bufferline), а
+  -- чужой оставляем нетронутым — иначе затираем кнопки управления floaterm,
+  -- которые тот ставит в winbar своего окна (см. plugins/vimfloaterm/hotkeys).
+  local ok, cur = pcall(vim.api.nvim_get_option_value, 'winbar', { win = win })
+  if ok and cur == WINBAR then
+    pcall(vim.api.nvim_set_option_value, 'winbar', '', { win = win })
+  end
 end
 
 function M.setup()

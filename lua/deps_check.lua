@@ -11,6 +11,7 @@ local required = {
   { bin = 'rg',         hint = 'brew install ripgrep' },                        -- telescope live_grep
   { bin = 'lazygit',    hint = 'brew install lazygit' },
   { bin = 'lazydocker', hint = 'brew install lazydocker' },
+  { bin = 'lazysql',    hint = 'brew install jorgerojas26/lazysql/lazysql' },
   { bin = 'node',       hint = 'brew install node' },                           -- mason/pyright
   { bin = 'claude',     hint = 'npm install -g @anthropic-ai/claude-code' },    -- claudecode.nvim
 }

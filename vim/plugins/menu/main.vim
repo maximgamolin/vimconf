@@ -66,7 +66,15 @@ call quickui#menu#install('&AI', [
 " Tools меню (вес 9500 — после AI, перед Help)
 call quickui#menu#install('&Tools', [
         \ ["&Docker\t(\\ld)", 'lua LazyDockerOpen()', 'lazydocker: контейнеры, порты, логи, ресурсы'],
+        \ ["&SQL\t(\\ls)", 'lua LazySqlOpen()', 'lazysql: подключения к БД, таблицы, запросы'],
         \ ], 9500)
+
+" Python меню (вес 9600 — после Tools)
+call quickui#menu#install('&Python', [
+        \ ["&Тест: запуск / отладка\t(\\tt)", "lua require('plugins.pytest_runner').open_menu()", 'PyCharm-style: запустить или отладить тест-метод/класс под курсором'],
+        \ ['--', ''],
+        \ ['&Закрыть интерфейс дебаггера', 'lua require("dapui").close()', 'Скрыть окна dap-ui'],
+        \ ], 9600)
 
 " register HELP menu with weight 10000
 call quickui#menu#install('H&elp', [

@@ -134,17 +134,80 @@ function M.collect_env()
   return result
 end
 
--- Применяет env-переменные в текущий процесс nvim (наследуются новыми терминалами)
+-- Как collect_env, но дополнительно возвращает источник каждой переменной.
+-- Возвращает { vars = { key = value }, source = { key = 'env'|'ini' } }
+function M.collect_env_sources()
+  local vars, source = {}, {}
+
+  local dotenv_path = M.project_root() .. '/.env'
+  for k, v in pairs(parse_dotenv(dotenv_path)) do
+    vars[k] = v
+    source[k] = 'env'
+  end
+
+  local ini_env = parse(M.settings_path())['env'] or {}
+  for k, v in pairs(ini_env) do
+    vars[k] = v
+    source[k] = 'ini'
+  end
+
+  return { vars = vars, source = source }
+end
+
+-- venv/bin, добавленный в PATH прошлым вызовом apply_env. Нужен, чтобы при
+-- повторных вызовах убрать свой прежний префикс и не плодить дубли — при этом
+-- НЕ трогая остальной PATH (например, каталог mason с pyright-langserver,
+-- который mason.setup() добавляет в начало PATH уже после старта модуля).
+local last_venv_bin = nil
+
+-- Убирает ВСЕ вхождения каталога `dir` из PATH (в любой позиции). Нужно,
+-- потому что mason добавляет свой bin в начало PATH уже после нашего префикса,
+-- и venv/bin перестаёт быть ведущим элементом.
+local function strip_path_entry(path, dir)
+  if not dir or dir == '' then return path end
+  local kept = {}
+  for entry in (path .. ':'):gmatch('([^:]*):') do
+    if entry ~= '' and entry ~= dir then
+      kept[#kept + 1] = entry
+    end
+  end
+  return table.concat(kept, ':')
+end
+
+-- Применяет env-переменные в текущий процесс nvim.
+-- Новые терминалы (floaterm использует termopen) наследуют это окружение
+-- автоматически — ничего печатать в шелл не нужно.
 local function apply_env(vars)
   for k, v in pairs(vars) do
     vim.fn.setenv(k, v)
   end
-  -- VIRTUAL_ENV_PYTHON — удобный алиас
+
+  -- Берём ЖИВОЙ PATH (со всеми правками плагинов, напр. mason) и убираем из
+  -- него только тот venv/bin, что добавили сами в прошлый раз.
+  local path = vim.fn.getenv('PATH')
+  if path == vim.NIL then path = '' end
+  path = strip_path_entry(path, last_venv_bin)
+
+  -- Эмуляция `source venv/bin/activate` через окружение, без запуска в шелле:
+  --   VIRTUAL_ENV + venv/bin в начало PATH + снять PYTHONHOME
   if vars.VIRTUAL_ENV then
-    vim.fn.setenv('VIRTUAL_ENV_PYTHON', vars.VIRTUAL_ENV .. '/bin/python')
+    local bin = vars.VIRTUAL_ENV .. '/bin'
+    vim.fn.setenv('PATH', bin .. ':' .. path)
+    last_venv_bin = bin
+    vim.fn.setenv('PYTHONHOME', vim.NIL)
+    vim.fn.setenv('VIRTUAL_ENV_PYTHON', bin .. '/python')
+    -- Префикс venv в приглашении (starship/p10k/powerline читают эту переменную)
+    vim.fn.setenv('VIRTUAL_ENV_PROMPT', '(' .. vim.fn.fnamemodify(vars.VIRTUAL_ENV, ':t') .. ') ')
     vim.notify('[project_settings] VIRTUAL_ENV: ' .. vars.VIRTUAL_ENV)
+  else
+    -- venv в проекте нет — оставляем PATH как есть (без нашего префикса)
+    vim.fn.setenv('PATH', path)
+    last_venv_bin = nil
+    vim.fn.setenv('VIRTUAL_ENV_PROMPT', vim.NIL)
   end
 end
+
+M.apply_env = function() apply_env(M.collect_env()) end
 
 -- Загружает настройки: применяет env, возвращает { abs_path -> color_key }
 function M.load()
@@ -160,32 +223,50 @@ function M.load()
   return colors
 end
 
--- При открытии нового floaterm — экспортируем переменные и активируем venv
-vim.api.nvim_create_autocmd('User', {
-  pattern = 'FloatermOpen',
+-- Гарантируем, что окружение проекта выставлено в процессе nvim ещё до
+-- открытия первого терминала (floaterm наследует его через termopen).
+vim.api.nvim_create_autocmd('VimEnter', {
   callback = function()
-    local vars = M.collect_env()
-    if vim.tbl_isempty(vars) then return end
-
-    local commands = {}
-
-    -- export всех переменных
-    for k, v in pairs(vars) do
-      local safe_v = v:gsub("'", "'\\''")
-      table.insert(commands, string.format("export %s='%s'", k, safe_v))
-    end
-
-    -- Активируем venv если есть VIRTUAL_ENV и файл activate существует
-    if vars.VIRTUAL_ENV then
-      local activate = vars.VIRTUAL_ENV .. '/bin/activate'
-      if vim.fn.filereadable(activate) == 1 then
-        table.insert(commands, 'source ' .. activate)
-      end
-    end
-
-    vim.cmd('FloatermSend ' .. table.concat(commands, ' && '))
+    apply_env(M.collect_env())
   end,
 })
+apply_env(M.collect_env())
+
+-- Печатает краткий гайд по окружению проекта в :messages при старте nvim
+-- (по аналогии с deps_check — проверкой установленных программ).
+function M.print_guide()
+  local info = M.collect_env_sources()
+
+  print('═══ Окружение проекта ═══')
+
+  -- venv
+  local venv = info.vars.VIRTUAL_ENV
+  if venv and vim.fn.isdirectory(venv) == 1 then
+    print('venv: ' .. venv .. '  OK')
+    print('  python: ' .. venv .. '/bin/python')
+    print('  пакеты: pip list   ·   pip freeze')
+  else
+    print('venv: NOT FOUND')
+    print('  создать : python3 -m venv .venv')
+    print('  включить: VIRTUAL_ENV=<путь>/.venv в .env или в [env] nvim_settings.ini')
+  end
+
+  -- переменные окружения
+  local keys = {}
+  for k in pairs(info.vars) do keys[#keys + 1] = k end
+  table.sort(keys)
+  if #keys == 0 then
+    print('переменные: нет (добавь в .env или в [env] nvim_settings.ini)')
+  else
+    print('переменные окружения (' .. #keys .. '):')
+    for _, k in ipairs(keys) do
+      local v = info.vars[k]
+      if #v > 60 then v = v:sub(1, 57) .. '...' end
+      local tag = info.source[k] == 'env' and '[.env]' or '[ini]'
+      print(string.format('  %-6s %s = %s', tag, k, v))
+    end
+  end
+end
 
 -- Сохраняет цвет директории
 function M.save_color(abs_path, color_key)

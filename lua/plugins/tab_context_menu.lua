@@ -6,6 +6,90 @@ local M = {}
 local _buf = nil
 local _win = nil
 
+-- Окно «с вкладками» — обычное файловое окно, в чьём winbar рисуется bufferline
+-- (тот же критерий, что и в menu_tabline.update_winbar).
+local function is_tab_window(win)
+  if vim.api.nvim_win_get_config(win).relative ~= '' then
+    return false
+  end
+  local buf = vim.api.nvim_win_get_buf(win)
+  return vim.bo[buf].buftype == '' and vim.bo[buf].buflisted
+end
+
+-- Закрытие последней вкладки в единственном окне с вкладками оставило бы пустой
+-- буфер и ломало раскладку. Блокируем такой случай. При наличии сплитов защита
+-- не действует — там есть куда «переехать» оставшемуся буферу.
+local function is_last_tab()
+  local tab_windows = 0
+  for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if is_tab_window(w) then
+      tab_windows = tab_windows + 1
+      if tab_windows > 1 then
+        return false
+      end
+    end
+  end
+  local listed = 0
+  for _, b in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.bo[b].buflisted then
+      listed = listed + 1
+      if listed > 1 then
+        return false
+      end
+    end
+  end
+  return true
+end
+
+-- Соседняя вкладка, на которую переключимся вместо закрываемой: следующий
+-- buflisted-буфер (как переключение вкладки вперёд), иначе предыдущий.
+local function pick_replacement(bufnr)
+  local listed = {}
+  for _, b in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.bo[b].buflisted then
+      table.insert(listed, b)
+    end
+  end
+  local idx
+  for i, b in ipairs(listed) do
+    if b == bufnr then
+      idx = i
+      break
+    end
+  end
+  if not idx then
+    return listed[1] ~= bufnr and listed[1] or nil
+  end
+  return listed[idx + 1] or listed[idx - 1]
+end
+
+-- Закрытие вкладки. Используется и крестиком на вкладке (close_command в
+-- bufferline.setup), и пунктом меню «Закрыть».
+--
+-- Нельзя просто `bdelete`: если буфер показан в окне, а рядом есть другое окно
+-- (например, сплит-терминал), Neovim закрывает само окно — раскладка ломается,
+-- терминал разворачивается на весь экран. Поэтому сначала переключаем все окна
+-- с этим буфером на соседнюю вкладку и только потом удаляем буфер — окна и
+-- сплиты остаются на месте.
+function M.close(bufnr)
+  if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
+    return
+  end
+  if is_last_tab() then
+    vim.notify('Нельзя закрыть последнюю вкладку', vim.log.levels.WARN)
+    return
+  end
+  local repl = pick_replacement(bufnr)
+  if repl then
+    for _, w in ipairs(vim.api.nvim_list_wins()) do
+      if vim.api.nvim_win_get_buf(w) == bufnr then
+        vim.api.nvim_win_set_buf(w, repl)
+      end
+    end
+  end
+  pcall(vim.cmd, 'bdelete ' .. bufnr)
+end
+
 function M.open(bufnr)
   if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
     return
@@ -77,11 +161,11 @@ function M.action(act)
     vim.api.nvim_win_set_buf(0, buf)
     detach_from(win, buf)
   elseif act == 'close' then
-    vim.cmd('bd ' .. buf)
+    M.close(buf)
   elseif act == 'close_others' then
     for _, b in ipairs(vim.api.nvim_list_bufs()) do
       if b ~= buf and vim.bo[b].buflisted then
-        vim.cmd('bd ' .. b)
+        M.close(b)
       end
     end
   elseif act == 'copy_name' then

@@ -20,7 +20,7 @@ Plug 'nvim-treesitter/nvim-treesitter', {'branch': 'main', 'do': ':TSUpdate'}
 "(плагин playground архивирован, refactor заменён LSP-командами grr/gnd)
 "Телескоп для поиска
 Plug 'nvim-lua/plenary.nvim'
-Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.8' }
+Plug 'nvim-telescope/telescope.nvim', { 'branch': 'master' } " master: previewer использует нативный vim.treesitter, совместим с nvim-treesitter веткой main
 Plug 'nvim-telescope/telescope-fzy-native.nvim' " Тоже для телескопа, но чтобы работал поиск по коммитам
 "Локальная история изменения файлов
 Plug 'mbbill/undotree'
@@ -183,6 +183,19 @@ augroup SpellNoStrike
 augroup END
 hi SpellBad gui=undercurl cterm=undercurl guisp=#dc322f
 
+" LSP: мягкая подсветка вхождений переменной под курсором.
+" Лёгкий фон в тон solarized + подчёркивание, текст сохраняет свой цвет и читается.
+function! s:LspRefColors() abort
+  hi LspReferenceText  guibg=#eee8d5 gui=underline guisp=#93a1a1 cterm=underline
+  hi LspReferenceRead  guibg=#eee8d5 gui=underline guisp=#93a1a1 cterm=underline
+  hi LspReferenceWrite guibg=#eee8d5 gui=underline guisp=#b58900 cterm=underline
+endfunction
+augroup LspRefColors
+  autocmd!
+  autocmd ColorScheme * call s:LspRefColors()
+augroup END
+call s:LspRefColors()
+
 " Стили которые должны идти до
 lua require('style.main')
 " Подключение конфига плагинов
@@ -201,6 +214,7 @@ lua require('plugins.rainbow.main')
 lua require('plugins.markid.main')
 lua require('plugins.lazygit.main')
 lua require('plugins.lazydocker.main')
+lua require('plugins.lazysql.main')
 lua require('plugins.claudecode.main')
 lua require('plugins.rendermarkdown.main')
 " После полной загрузки — подгружаем цвета дерева из nvim_settings.ini
@@ -221,6 +235,9 @@ nnoremap <silent> <leader>dd :lua require('dap').continue()<CR>
 nnoremap <silent> <leader>dn :lua require('dap-python').test_method()<CR>
 nnoremap <silent> <leader>df :lua require('dap-python').test_class()<CR>
 vnoremap <silent> <leader>ds <ESC>:lua require('dap-python').debug_selection()<CR>
+
+" Меню запуск/отладка теста под курсором (аналог стрелки в гуттере PyCharm)
+nnoremap <silent> <leader>tt :lua require('plugins.pytest_runner').open_menu()<CR>
 
 
 "Telescope горячие клавиши
@@ -415,6 +432,8 @@ end
   print('Python virtual env: ' .. venv_path)
   -- Проверка внешних программ (lazygit, lazydocker, ctags и т.д.)
   require('deps_check').check()
+  -- Гайд по окружению проекта (venv, переменные из .env / nvim_settings.ini)
+  require('project_settings').print_guide()
   local python_settings = {}
   if venv_path ~= '' and venv_path ~= 'NIL' then
     -- pythonPath должен указывать на бинарник интерпретатора, а не на папку venv
@@ -497,8 +516,16 @@ cmp_ai:setup({
 
 -- DAP для python
 local dap_python = require("dap-python")
-dap_python.setup(vim.env.VIRTUAL_ENV_PYTHON)
+-- Python для адаптера debugpy: активный venv, иначе системный python3/python.
+-- (в системе может не быть команды `python` — тогда адаптер не стартует)
+local dap_py = vim.env.VIRTUAL_ENV_PYTHON
+if not dap_py or dap_py == '' then
+  dap_py = vim.fn.exepath('python3')
+  if dap_py == '' then dap_py = vim.fn.exepath('python') end
+end
+dap_python.setup(dap_py)
 dap_python.test_runner = vim.env.PYTESTRUNNER or 'pytest'
+
 
 -- Автоматичеси открывать и закрывать окно при запуске дебаггера
 local dap, dapui = require("dap"), require("dapui")
@@ -524,6 +551,11 @@ require("bufferline").setup{
     -- левая кнопка — переключить вкладку в том окне, по чьим вкладкам кликнули
     left_mouse_command = function(buf)
       require('plugins.tab_context_menu').switch(buf)
+    end,
+    -- крестик на вкладке — закрытие без разрушения раскладки (см. M.close),
+    -- вместо дефолтного «bdelete! %d», который закрывает окно
+    close_command = function(buf)
+      require('plugins.tab_context_menu').close(buf)
     end,
     -- правая кнопка по вкладке — контекстное меню quickui вместо bdelete по умолчанию
     right_mouse_command = function(buf)
