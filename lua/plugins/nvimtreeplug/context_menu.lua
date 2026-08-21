@@ -20,44 +20,84 @@ function M.open()
       "lua require('plugins.nvimtreeplug.dir_highlight').mark('" .. c.key .. "')",
     })
   end
-  table.insert(color_items, { 'Снять выделение',      "lua require('plugins.nvimtreeplug.dir_highlight').clear_node()" })
-  table.insert(color_items, { 'Снять все выделения',  "lua require('plugins.nvimtreeplug.dir_highlight').clear_all()" })
+  table.insert(
+    color_items,
+    { 'Снять выделение', "lua require('plugins.nvimtreeplug.dir_highlight').clear_node()" }
+  )
+  table.insert(
+    color_items,
+    { 'Снять все выделения', "lua require('plugins.nvimtreeplug.dir_highlight').clear_all()" }
+  )
 
   local create_items = {
     { '--', '' },
-    { 'Создать файл',  "lua require('plugins.nvimtreeplug.context_menu').action('create_file')" },
+    { 'Создать файл', "lua require('plugins.nvimtreeplug.context_menu').action('create_file')" },
     { 'Создать папку', "lua require('plugins.nvimtreeplug.context_menu').action('create_dir')" },
     { '--', '' },
-    { 'Показать/скрыть дату и размер', "lua require('plugins.nvimtreeplug.file_info_decorator').toggle()" },
+    {
+      'Показать/скрыть дату и размер',
+      "lua require('plugins.nvimtreeplug.file_info_decorator').toggle()",
+    },
   }
 
   local items
   if node.type == 'directory' then
     items = {}
-    for _, v in ipairs(color_items) do table.insert(items, v) end
-    for _, v in ipairs(create_items) do table.insert(items, v) end
+    for _, v in ipairs(color_items) do
+      table.insert(items, v)
+    end
+    for _, v in ipairs(create_items) do
+      table.insert(items, v)
+    end
   else
     items = {
-      { 'Открыть',                           "lua require('plugins.nvimtreeplug.context_menu').action('open')" },
-      { 'Открыть в новой вкладке',           "lua require('plugins.nvimtreeplug.context_menu').action('tab')" },
-      { 'Разделить экран и открыть',         "lua require('plugins.nvimtreeplug.context_menu').action('split')" },
+      { 'Открыть', "lua require('plugins.nvimtreeplug.context_menu').action('open')" },
+      {
+        'Открыть в новой вкладке',
+        "lua require('plugins.nvimtreeplug.context_menu').action('tab')",
+      },
+      {
+        'Разделить экран и открыть',
+        "lua require('plugins.nvimtreeplug.context_menu').action('split')",
+      },
       { '--', '' },
-      { 'Скопировать название файла',        "lua require('plugins.nvimtreeplug.context_menu').action('copy_name')" },
-      { 'Скопировать путь от корня проекта', "lua require('plugins.nvimtreeplug.context_menu').action('copy_rel')" },
-      { 'Скопировать полный путь на диске',  "lua require('plugins.nvimtreeplug.context_menu').action('copy_abs')" },
+      {
+        'Скопировать название файла',
+        "lua require('plugins.nvimtreeplug.context_menu').action('copy_name')",
+      },
+      {
+        'Скопировать путь от корня проекта',
+        "lua require('plugins.nvimtreeplug.context_menu').action('copy_rel')",
+      },
+      {
+        'Скопировать полный путь на диске',
+        "lua require('plugins.nvimtreeplug.context_menu').action('copy_abs')",
+      },
       { '--', '' },
-      { 'Добавить в гит',                    "lua require('plugins.nvimtreeplug.context_menu').action('git_add')" },
-      { 'Частично добавить в гит',           "lua require('plugins.nvimtreeplug.context_menu').action('git_add_patch')" },
+      {
+        'Добавить в гит',
+        "lua require('plugins.nvimtreeplug.context_menu').action('git_add')",
+      },
+      {
+        'Частично добавить в гит',
+        "lua require('plugins.nvimtreeplug.context_menu').action('git_add_patch')",
+      },
     }
-    for _, v in ipairs(color_items) do table.insert(items, v) end
-    for _, v in ipairs(create_items) do table.insert(items, v) end
+    for _, v in ipairs(color_items) do
+      table.insert(items, v)
+    end
+    for _, v in ipairs(create_items) do
+      table.insert(items, v)
+    end
   end
 
   vim.fn['quickui#context#open'](items, vim.empty_dict())
 end
 
 function M.action(act)
-  if not _node then return end
+  if not _node then
+    return
+  end
   local full_path = _node.absolute_path
   local node_type = _node.type
   local filename = vim.fn.fnamemodify(full_path, ':t')
@@ -71,21 +111,27 @@ function M.action(act)
 
   if act == 'create_file' then
     local name = vim.fn.input('Имя файла: ', '', 'file')
-    if name == '' then return end
+    if name == '' then
+      return
+    end
     local target = base_dir .. '/' .. name
     local parent = vim.fn.fnamemodify(target, ':h')
     vim.fn.mkdir(parent, 'p')
     -- Создаём файл если не существует
     if vim.fn.filereadable(target) == 0 then
       local f = io.open(target, 'w')
-      if f then f:close() end
+      if f then
+        f:close()
+      end
     end
     require('nvim-tree.api').tree.reload()
     vim.notify('Создан файл: ' .. target)
     return
   elseif act == 'create_dir' then
     local name = vim.fn.input('Имя папки: ', '', 'file')
-    if name == '' then return end
+    if name == '' then
+      return
+    end
     local target = base_dir .. '/' .. name
     vim.fn.mkdir(target, 'p')
     require('nvim-tree.api').tree.reload()
@@ -118,8 +164,9 @@ function M.action(act)
   elseif act == 'git_add_patch' then
     -- Открываем git add -p в плавающем терминале, после закрытия — reload дерева
     vim.cmd(
-      'FloatermNew --width=0.85 --height=0.85 --title=git\\ add\\ -p --autoclose=1 ' ..
-      'git -c color.ui=always add -p ' .. vim.fn.shellescape(full_path)
+      'FloatermNew --width=0.85 --height=0.85 --title=git\\ add\\ -p --autoclose=1 '
+        .. 'git -c color.ui=always add -p '
+        .. vim.fn.shellescape(full_path)
     )
     -- Обновляем дерево когда floaterm закроется
     vim.api.nvim_create_autocmd('User', {

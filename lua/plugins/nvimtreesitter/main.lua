@@ -4,8 +4,7 @@
 local function is_big_file(bufnr)
   local name = vim.api.nvim_buf_get_name(bufnr)
   local ok, stats = pcall(vim.uv.fs_stat, name)
-  return (ok and stats and stats.size > 256 * 1024)
-    or vim.api.nvim_buf_line_count(bufnr) > 8000
+  return (ok and stats and stats.size > 256 * 1024) or vim.api.nvim_buf_line_count(bufnr) > 8000
 end
 
 -- Установка парсеров (аналог ensure_installed из старого API):

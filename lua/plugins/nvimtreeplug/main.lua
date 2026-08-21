@@ -10,10 +10,9 @@ vim.g.loaded_netrwPlugin = 1
 -- optionally enable 24-bit colour
 vim.opt.termguicolors = true
 
-
 local FileInfoDecorator = require('plugins.nvimtreeplug.file_info_decorator')
 
-require("nvim-tree").setup({
+require('nvim-tree').setup({
   on_attach = function(bufnr)
     local api = require('nvim-tree.api')
     api.config.mappings.default_on_attach(bufnr)
@@ -23,11 +22,15 @@ require("nvim-tree").setup({
     -- Открытие узла одиночным кликом (по умолчанию нужен двойной клик).
     -- <LeftRelease>, а не <LeftMouse>: к моменту отпускания курсор уже
     -- переместился на строку, по которой кликнули.
-    vim.keymap.set('n', '<LeftRelease>', api.node.open.edit,
-      { buffer = bufnr, noremap = true, silent = true, desc = 'Открыть узел одним кликом' })
+    vim.keymap.set(
+      'n',
+      '<LeftRelease>',
+      api.node.open.edit,
+      { buffer = bufnr, noremap = true, silent = true, desc = 'Открыть узел одним кликом' }
+    )
   end,
   sort = {
-    sorter = "case_sensitive",
+    sorter = 'case_sensitive',
   },
   view = {
     width = 45,
@@ -35,13 +38,13 @@ require("nvim-tree").setup({
   },
   renderer = {
     group_empty = true,
-    decorators = { "Git", "Open", "Hidden", "Modified", "Bookmark", "Diagnostics", "Copied", FileInfoDecorator, "Cut" },
+    decorators = { 'Git', 'Open', 'Hidden', 'Modified', 'Bookmark', 'Diagnostics', 'Copied', FileInfoDecorator, 'Cut' },
     indent_markers = {
-      enable = true,  -- Показывать/скрывать маркеры отступов
+      enable = true, -- Показывать/скрывать маркеры отступов
     },
     icons = {
       show = {
-        file = true,         -- Иконки файлов по расширению (nvim-web-devicons)
+        file = true, -- Иконки файлов по расширению (nvim-web-devicons)
         folder = true,
         folder_arrow = true,
         git = true,

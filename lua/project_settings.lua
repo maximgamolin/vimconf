@@ -23,7 +23,9 @@ local function parse(path)
   local data = {}
   local section = nil
   local f = io.open(path, 'r')
-  if not f then return data end
+  if not f then
+    return data
+  end
   for line in f:lines() do
     line = line:match('^%s*(.-)%s*$')
     if line:match('^%[.+%]$') then
@@ -87,7 +89,9 @@ end
 
 -- Восстанавливает абсолютный путь из относительного
 local function to_abs(rel_path)
-  if rel_path:sub(1, 1) == '/' then return rel_path end
+  if rel_path:sub(1, 1) == '/' then
+    return rel_path
+  end
   return M.project_root() .. '/' .. rel_path
 end
 
@@ -96,7 +100,9 @@ end
 local function parse_dotenv(path)
   local vars = {}
   local f = io.open(path, 'r')
-  if not f then return vars end
+  if not f then
+    return vars
+  end
   for line in f:lines() do
     line = line:match('^%s*(.-)%s*$')
     if line ~= '' and not line:match('^#') then
@@ -164,7 +170,9 @@ local last_venv_bin = nil
 -- потому что mason добавляет свой bin в начало PATH уже после нашего префикса,
 -- и venv/bin перестаёт быть ведущим элементом.
 local function strip_path_entry(path, dir)
-  if not dir or dir == '' then return path end
+  if not dir or dir == '' then
+    return path
+  end
   local kept = {}
   for entry in (path .. ':'):gmatch('([^:]*):') do
     if entry ~= '' and entry ~= dir then
@@ -185,7 +193,9 @@ local function apply_env(vars)
   -- Берём ЖИВОЙ PATH (со всеми правками плагинов, напр. mason) и убираем из
   -- него только тот venv/bin, что добавили сами в прошлый раз.
   local path = vim.fn.getenv('PATH')
-  if path == vim.NIL then path = '' end
+  if path == vim.NIL then
+    path = ''
+  end
   path = strip_path_entry(path, last_venv_bin)
 
   -- Эмуляция `source venv/bin/activate` через окружение, без запуска в шелле:
@@ -207,7 +217,9 @@ local function apply_env(vars)
   end
 end
 
-M.apply_env = function() apply_env(M.collect_env()) end
+M.apply_env = function()
+  apply_env(M.collect_env())
+end
 
 -- Загружает настройки: применяет env, возвращает { abs_path -> color_key }
 function M.load()
@@ -253,7 +265,9 @@ function M.print_guide()
 
   -- переменные окружения
   local keys = {}
-  for k in pairs(info.vars) do keys[#keys + 1] = k end
+  for k in pairs(info.vars) do
+    keys[#keys + 1] = k
+  end
   table.sort(keys)
   if #keys == 0 then
     print('переменные: нет (добавь в .env или в [env] nvim_settings.ini)')
@@ -261,7 +275,9 @@ function M.print_guide()
     print('переменные окружения (' .. #keys .. '):')
     for _, k in ipairs(keys) do
       local v = info.vars[k]
-      if #v > 60 then v = v:sub(1, 57) .. '...' end
+      if #v > 60 then
+        v = v:sub(1, 57) .. '...'
+      end
       local tag = info.source[k] == 'env' and '[.env]' or '[ini]'
       print(string.format('  %-6s %s = %s', tag, k, v))
     end
@@ -281,9 +297,11 @@ end
 function M.remove_color(abs_path)
   local path = M.settings_path()
   local data = parse(path)
-  if not data['tree_colors'] then return end
+  if not data['tree_colors'] then
+    return
+  end
   data['tree_colors'][to_rel(abs_path)] = nil
-  data['tree_colors'][abs_path] = nil  -- на случай абсолютного пути в файле
+  data['tree_colors'][abs_path] = nil -- на случай абсолютного пути в файле
   write(path, data)
 end
 

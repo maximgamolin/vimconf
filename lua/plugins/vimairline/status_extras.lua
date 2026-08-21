@@ -119,8 +119,12 @@ function M.poll_claude()
         model, model_pct = text:match('Current week %(all models%).-Current week %((%w[%w%s.]-)%): (%d+)%% used')
       end
       local parts = {}
-      if session then table.insert(parts, ('сессия %d%%'):format(100 - session)) end
-      if week then table.insert(parts, ('неделя %d%%'):format(100 - week)) end
+      if session then
+        table.insert(parts, ('сессия %d%%'):format(100 - session))
+      end
+      if week then
+        table.insert(parts, ('неделя %d%%'):format(100 - week))
+      end
       if model and model_pct then
         table.insert(parts, ('%s %d%%'):format(model, 100 - tonumber(model_pct)))
       end
@@ -150,9 +154,13 @@ function M.setup()
   M.poll_claude()
   local t2 = vim.uv.new_timer()
   -- лимиты — раз в 5 минут (каждый опрос запускает claude CLI на ~4 сек)
-  t2:start(300000, 300000, vim.schedule_wrap(function()
-    M.poll_claude()
-  end))
+  t2:start(
+    300000,
+    300000,
+    vim.schedule_wrap(function()
+      M.poll_claude()
+    end)
+  )
 
   -- когда терминал Claude виден во вкладке — обновить сразу (не чаще раза в минуту)
   vim.api.nvim_create_autocmd({ 'BufWinEnter', 'BufEnter', 'TermEnter', 'TabEnter' }, {

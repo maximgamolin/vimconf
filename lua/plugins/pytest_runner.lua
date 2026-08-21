@@ -62,9 +62,8 @@ function M.run_method()
     vim.notify('Не найден тест-метод под курсором', vim.log.levels.WARN)
     return
   end
-  local nodeid = ctx.class
-      and (file_id() .. '::' .. ctx.class .. '::' .. ctx.method)
-      or (file_id() .. '::' .. ctx.method)
+  local nodeid = ctx.class and (file_id() .. '::' .. ctx.class .. '::' .. ctx.method)
+    or (file_id() .. '::' .. ctx.method)
   run_in_term(pytest_cmd(nodeid))
 end
 
@@ -98,8 +97,8 @@ function M.open_menu()
     { 'Запустить метод:  ' .. method_label, "lua require('plugins.pytest_runner').run_method()" },
     { 'Отладить  метод:  ' .. method_label, "lua require('plugins.pytest_runner').debug_method()" },
     { '--', '' },
-    { 'Запустить класс:  ' .. class_label,  "lua require('plugins.pytest_runner').run_class()" },
-    { 'Отладить  класс:  ' .. class_label,  "lua require('plugins.pytest_runner').debug_class()" },
+    { 'Запустить класс:  ' .. class_label, "lua require('plugins.pytest_runner').run_class()" },
+    { 'Отладить  класс:  ' .. class_label, "lua require('plugins.pytest_runner').debug_class()" },
   }
 
   vim.fn['quickui#context#open'](items, { index = vim.g['quickui#context#cursor'] })

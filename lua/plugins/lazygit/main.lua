@@ -15,7 +15,7 @@ function LazyGitCommitPush()
   end
   local cmd = string.format(
     'FloatermNew --width=0.7 --height=0.5 --autoclose=0 --title=commit\\ \\&\\ push '
-    .. "bash -c 'git add -A && git commit -m %s && git push; echo; read -p \"Готово. Enter для закрытия...\"'",
+      .. 'bash -c \'git add -A && git commit -m %s && git push; echo; read -p "Готово. Enter для закрытия..."\'',
     vim.fn.shellescape(msg)
   )
   vim.cmd(cmd)

@@ -1,7 +1,12 @@
 local open_path = require('plugins.vimfloaterm.open_path')
 
 -- Горячие клавиши для терминала
-vim.api.nvim_set_keymap('n', '<C-d>', ':FloatermNew --height=0.2 --width=1.00 --wintype=split --position=bottom<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap(
+  'n',
+  '<C-d>',
+  ':FloatermNew --height=0.2 --width=1.00 --wintype=split --position=bottom<CR>',
+  { noremap = true, silent = true }
+)
 
 -- Функции для кнопок в winbar терминала
 function _G.FloatermWinbarKill()
@@ -58,8 +63,7 @@ function _G.FloatermWinbar()
       local cur = vim.fn.bufnr('%')
       for i, b in ipairs(list) do
         local hl = (b == cur) and '%#FloatermTabSel#' or '%#FloatermTab#'
-        out[#out + 1] = ('%s%%%d@v:lua.FloatermTabClick@%s%%X%%#FloatermTab#'):format(
-          hl, b, term_label(b, i))
+        out[#out + 1] = ('%s%%%d@v:lua.FloatermTabClick@%s%%X%%#FloatermTab#'):format(hl, b, term_label(b, i))
       end
     end
     return table.concat(out)
