@@ -5,7 +5,7 @@ M.path_colors = {}
 function M.parse_project_dir_colors()
   local env_variable = os.getenv('PROJECT_DIR_COLORS')
   if not env_variable then
-    print("PROJECT_DIR_COLORS is not set.")
+    print('PROJECT_DIR_COLORS is not set.')
     return
   end
 
@@ -43,7 +43,9 @@ function M.colorize()
   local lib = require('nvim-tree.lib')
 
   -- Если дерево не открыто, ничего не делать
-  if not view.win_open() then return end
+  if not view.win_open() then
+    return
+  end
 
   local root_node = lib.get_node_at_cursor()
 
@@ -54,30 +56,19 @@ function M.colorize()
   end
 end
 
-function set_directory_colors()
+local function set_directory_colors()
   M.parse_project_dir_colors()
 
   -- Подписываемся на события nvim-tree
   local tree_events = require('nvim-tree.api').events
 
-tree_events.subscribe("TreeOpen", function(event)
-  M.colorize()
-end)
-
-tree_events.subscribe("FolderCreated", function(event)
-  M.colorize()
-end)
-
-tree_events.subscribe("FileRemoved", function(event)
-  M.colorize()
-end)
-
-tree_events.subscribe("FileRenamed", function(event)
-  M.colorize()
-end)
+  for _, event in ipairs({ 'TreeOpen', 'FolderCreated', 'FileRemoved', 'FileRenamed' }) do
+    tree_events.subscribe(event, function()
+      M.colorize()
+    end)
+  end
 end
 
 set_directory_colors()
 
 return M
-

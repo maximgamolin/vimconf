@@ -1,5 +1,11 @@
 " Установить ctags, fzf, fd, ripgrep
 " Для python установить debugpy
+" Структура конфига:
+"   vim/settings/   — опции, общие хоткеи, цвета
+"   vim/plugins/    — конфиги плагинов на vimscript (меню, скроллбар)
+"   vim/functions/  — вспомогательные функции (git)
+"   lua/plugins/    — конфиги плагинов на lua (по папке на плагин)
+"   lua/style/      — цвета treesitter и отступов
 call plug#begin()
 "Цветовая схема
 Plug 'maxmx03/solarized.nvim'
@@ -60,7 +66,7 @@ Plug 'rcarriga/nvim-dap-ui'
 Plug 'mfussenegger/nvim-dap-python'
 " Шрифты
 Plug 'onsails/lspkind.nvim'
-Plug 'ryanoasis/vim-devicons' " Дев иконки везде 
+Plug 'ryanoasis/vim-devicons' " Дев иконки везде
 " Комментировать участки кода
 Plug 'preservim/nerdcommenter'
 " Закрывать парные скобки
@@ -79,130 +85,25 @@ Plug 'nvim-tree/nvim-tree.lua'
 Plug 'MattesGroeger/vim-bookmarks'
 " Рендер markdown прямо в буфере
 Plug 'MeanderingProgrammer/render-markdown.nvim'
+" Картинки в терминале по kitty graphics protocol (требует: brew install imagemagick)
+Plug '3rd/image.nvim'
+" PlantUML/Mermaid диаграммы картинками в markdown (требует: brew install plantuml)
+Plug '3rd/diagram.nvim'
 call plug#end()
 
-" Работа хоткеев при русской раскладке (langmap)
-set langmap=ФИСВУАПРШОЛДЬТЩЗЙКЫЕГМЦЧНЯ;ABCDEFGHIJKLMNOPQRSTUVWXYZ,фисвуапршолдьтщзйкыегмцчня;abcdefghijklmnopqrstuvwxyz
-
-" Ctrl+кириллица → Ctrl+латиница (langmap не покрывает модификаторы)
-noremap <C-ф> <C-a>
-noremap <C-и> <C-b>
-noremap <C-с> <C-c>
-noremap <C-в> <C-d>
-noremap <C-у> <C-e>
-noremap <C-а> <C-f>
-noremap <C-п> <C-g>
-noremap <C-р> <C-h>
-noremap <C-ш> <C-i>
-noremap <C-о> <C-j>
-noremap <C-л> <C-k>
-noremap <C-д> <C-l>
-noremap <C-ь> <C-m>
-noremap <C-т> <C-n>
-noremap <C-щ> <C-o>
-noremap <C-з> <C-p>
-noremap <C-й> <C-q>
-noremap <C-к> <C-r>
-noremap <C-ы> <C-s>
-noremap <C-е> <C-t>
-noremap <C-г> <C-u>
-noremap <C-м> <C-v>
-noremap <C-ц> <C-w>
-noremap <C-ч> <C-x>
-noremap <C-н> <C-y>
-noremap <C-я> <C-z>
-
-augroup autosave
-  autocmd!
-  " Сохранять при выходе из режима вставки и после изменений в normal mode
-  autocmd InsertLeave,TextChanged * if &modifiable && !&readonly && bufname('%') != '' | silent! write | endif
-  " Сохранять при потере фокуса (переключение окна/приложения)
-  autocmd FocusLost * if &modifiable && !&readonly && bufname('%') != '' | silent! write | endif
-augroup end
-
-set mouse=a    " Включить поддержку мыши (перетаскивание границ окон)
-set mousescroll=ver:1,hor:6  " Колесо скроллит по 1 строке вместо 3 — плавнее
-set mousemodel=extend  " Правый клик доходит до обработчиков (меню вкладок), а не открывает встроенный popup
-set smoothscroll   " Прокрутка по экранным строкам (длинные строки не «прыгают»)
-set clipboard=unnamedplus  " Синхронизировать буфер yank с системным буфером обмена
-
-" Command+C — копировать выделение в буфер обмена (работает в GUI/Neovide)
-vnoremap <D-c> "+y
-nnoremap <D-c> "+yy
-set number "Номера строк
-set laststatus=3 " Одна общая нижняя панель на всё окно вместо отдельной на каждый сплит
-set noshowmode " Не печатать «-- ВИЗУАЛЬНЫЙ РЕЖИМ --» в командной строке — режим и так виден в airline
-
-" Сворачивание кода через treesitter (как + в PyCharm)
-set foldmethod=expr
-set foldexpr=v:lua.vim.treesitter.foldexpr()
-set foldlevelstart=99  " По умолчанию всё раскрыто при открытии файла
-set foldenable
-set foldcolumn=1       " Показывать колонку со значками + слева от номеров строк
-set cursorline     " Подсветка текущей строки
-set showcmd        " Показ текущей команды
-set wildmenu       " Включить меню авто-дополнения
-set updatetime=250 " Для signify и LSP document_highlight (100 давало лишние LSP-запросы при движении)
-set expandtab "Пробелы вместо табуляци
-
-set hlsearch "Подсветка поиска
-set incsearch "Инкрементальный поиск
-
-syntax on "Подсветка синтаксиса
-set completeopt=menu,menuone,noselect " Отключение стандартного автодополнения для nvim-cmp
-" Настройка заголовка окна
-set title 
-set titlestring=%{getcwd()}
-"Настройка цветовой схемы
-
-" Количество цветов для терминала (256 или 16)
-set t_Co=256
-
-" Использовать 24-битные цвета, если ваш терминал поддерживает это (например, iTerm2, gnome-terminal и т.д.)
-if (has("termguicolors"))
-  set termguicolors
-endif
-
-set background=light      " Установить светлую тему
-colorscheme solarized
-" Включаем проверку орфографии
-set spell
-
-" Устанавливаем языки для проверки
-set spelllang=en,ru
-" Дополнительные настройки для улучшения отображения UI
-hi Normal guibg=NONE ctermbg=NONE  " Убрать фон
-hi LineNr guifg=#a3adab            " Цвет номеров строк (LINE_NUMBERS_COLOR)
-hi CursorLineNr guifg=#677d85      " Цвет номера строки под курсором (LINE_NUMBER_ON_CARET_ROW_COLOR)
-hi Comment guifg=#88999b           " Цвет комментариев (DEFAULT_LINE_COMMENT)
-
-" Спеллчек: убрать зачёркивание у незнакомых слов, оставить только волнистое подчёркивание
-augroup SpellNoStrike
-  autocmd!
-  autocmd ColorScheme * hi SpellBad gui=undercurl cterm=undercurl guisp=#dc322f
-augroup END
-hi SpellBad gui=undercurl cterm=undercurl guisp=#dc322f
-
-" LSP: мягкая подсветка вхождений переменной под курсором.
-" Лёгкий фон в тон solarized + подчёркивание, текст сохраняет свой цвет и читается.
-function! s:LspRefColors() abort
-  hi LspReferenceText  guibg=#eee8d5 gui=underline guisp=#93a1a1 cterm=underline
-  hi LspReferenceRead  guibg=#eee8d5 gui=underline guisp=#93a1a1 cterm=underline
-  hi LspReferenceWrite guibg=#eee8d5 gui=underline guisp=#b58900 cterm=underline
-endfunction
-augroup LspRefColors
-  autocmd!
-  autocmd ColorScheme * call s:LspRefColors()
-augroup END
-call s:LspRefColors()
+" Опции, общие хоткеи, цветовая схема
+source ~/.config/nvim/vim/settings/keymaps.vim
+source ~/.config/nvim/vim/settings/options.vim
+source ~/.config/nvim/vim/settings/colors.vim
 
 " Стили которые должны идти до
 lua require('style.main')
-" Подключение конфига плагинов
-
+" Шпаргалка по хоткеям (:Hlp)
 lua require('h')
 " Загружаем настройки проекта (VIRTUAL_ENV, цвета дерева) из nvim_settings.ini
 lua require('project_settings').load()
+
+" Конфиги плагинов
 lua require('plugins.nvimtreeplug.main')
 lua require('plugins.vimbookmarks.main')
 lua require('plugins.vimairline.main')
@@ -217,8 +118,10 @@ lua require('plugins.lazydocker.main')
 lua require('plugins.lazysql.main')
 lua require('plugins.claudecode.main')
 lua require('plugins.rendermarkdown.main')
+lua require('plugins.diagram.main')
 " После полной загрузки — подгружаем цвета дерева из nvim_settings.ini
 lua vim.api.nvim_create_autocmd('VimEnter', { once = true, callback = function() require('plugins.nvimtreeplug.dir_highlight').load_from_settings() end })
+
 source ~/.config/nvim/vim/functions/git/main.vim
 " Подключение меню должно быть последним/предпоследним
 source ~/.config/nvim/vim/plugins/menu/main.vim
@@ -228,422 +131,22 @@ lua require('plugins.menu_tabline').setup()
 " Стили которые должны идти последними
 lua require('style.treesitter')
 
-" DAP горячие клавиши
+" LSP (mason, pyright, хоткеи переходов, подсветка вхождений)
+lua require('plugins.lsp.main')
+" Проверка внешних программ (lazygit, lazydocker, ctags и т.д.)
+lua require('deps_check').check()
+" Гайд по окружению проекта (venv, переменные из .env / nvim_settings.ini)
+lua require('project_settings').print_guide()
+" Автодополнение (nvim-cmp, сниппеты, сигнатуры, cmp-ai)
+lua require('plugins.cmp.main')
+" Отладка (nvim-dap + dap-python + dap-ui, запуск тестов)
+lua require('plugins.dap.main')
+" Поиск (telescope + fzy)
+lua require('plugins.telescope.main')
+" Вкладки сверху
+lua require('plugins.bufferline.main')
+" Автозакрытие парных скобок
+lua require('plugins.autopairs.main')
 
-nnoremap <silent> <leader>db :lua require('dap').toggle_breakpoint()<CR>
-nnoremap <silent> <leader>dd :lua require('dap').continue()<CR>
-nnoremap <silent> <leader>dn :lua require('dap-python').test_method()<CR>
-nnoremap <silent> <leader>df :lua require('dap-python').test_class()<CR>
-vnoremap <silent> <leader>ds <ESC>:lua require('dap-python').debug_selection()<CR>
-
-" Меню запуск/отладка теста под курсором (аналог стрелки в гуттере PyCharm)
-nnoremap <silent> <leader>tt :lua require('plugins.pytest_runner').open_menu()<CR>
-
-
-"Telescope горячие клавиши
-nnoremap <leader>ff <cmd>Telescope find_files<cr>
-nnoremap <leader>fg <cmd>Telescope live_grep<cr>
-nnoremap <leader>fb <cmd>Telescope buffers<cr>
-nnoremap <leader>fh <cmd>Telescope help_tags<cr>
-nnoremap <M-F> <cmd>Telescope live_grep<cr>
-" Открыть локальную историю
-nnoremap <F5> :UndotreeToggle<CR>
-" Открыть бар с функциями и классами
-nnoremap <F8> :TagbarToggle<CR>
-
-
-
-
-
-
-lua <<EOF
--- LSP
-require("mason").setup()
-require("mason-lspconfig").setup {
-    ensure_installed = { "lua_ls", "pyright", "bashls", "cmake", "cssls", "dockerls", "docker_compose_language_service", "autotools_ls", "markdown_oxide", "nginx_language_server", "sqlls", "taplo", "lemminx", "yamlls" }
-}
-
--- LSP автодополнения
--- корневые диретории из переменной окрудения для lsp сервера
-local pythonpath = vim.env.PYTHONPATH
-local pythonpath_dirs = {}
-if pythonpath ~= nil then
-    for path in string.gmatch(pythonpath, "[^:]+") do
-        table.insert(pythonpath_dirs, path)
-    end
-end
-
--- Указываем стандартные корневые файлы и добавляем пути из PYTHONPATH
-local root_files = {
-    'pyproject.toml',
-    'setup.py',
-    'setup.cfg',
-    'requirements.txt',
-    '.git'
-}
-
--- Добавляем пути из PYTHONPATH в список корневых файлов
-for _, path in ipairs(pythonpath_dirs) do
-    table.insert(root_files, path)
-end
-
-
--- Поиск места использования проекта
-require('telescope').setup{
-  defaults = {
-    vimgrep_arguments = {
-      'rg',
-      '--color=never',
-      '--no-heading',
-      '--with-filename',
-      '--line-number',
-      '--column',
-      '--smart-case',
-    },
-    file_ignore_patterns = {"%.pyc$", "__pycache__", "venv", "^%.", "/%."},
-    layout_config = {
-      horizontal = {
-        preview_width = 0.4,
-      },
-      vertical = {
-        preview_height = 0.5,
-      },
-      width = 0.9,
-      height = 0.9,
-    },
-    path_display = {"truncate"}
-
-  }
-}
--- Сигнатура функций
-require'lsp_signature'.setup({
-    bind = true, -- Это обязательная настройка, позволяет управлять плавающим окном
-    hint_enable = false, -- Если true, включает подсказки в строке состояния
-    floating_window = true, -- Использовать плавающее окно для отображения информации
-    floating_window_above_cur_line = true, -- Плавающее окно над текущей строкой
-    doc_lines = 10, -- Количество строк документации, отображаемой в плавающем окне
-    max_height = 12, -- Максимальная высота плавающего окна
-    max_width = 120, -- Максимальная ширина плавающего окна
-    handler_opts = {
-      border = "rounded" -- Опции для рамки плавающего окна: "single", "double", "rounded", "solid", "shadow"
-    },
-    extra_trigger_chars = {"(", ","} -- Символы, которые будут вызывать отображение информации о параметрах функции
-  })
-
-
--- Require necessary modules
-local cmp = require('cmp')
-
--- Корневая директория проекта: ближайший предок с одним из root_files,
--- иначе — директория самого файла (как root_pattern + dirname из старого
--- require('lspconfig'), который удалён в пользу нативного vim.lsp.config)
-local function get_root_dir(bufnr, on_dir)
-    local fname = vim.api.nvim_buf_get_name(bufnr)
-    on_dir(vim.fs.root(bufnr, root_files) or vim.fs.dirname(fname))
-end
-  -- pyright настраивается ниже, в блоке с venv
-
-  -- nvim-cmp setup
-  local source_mapping = {
-  buffer = '[Buffer]',
-  nvim_lsp = '[LSP]',
-  nvim_lua = '[Lua]',
-  cmp_ai = '[AI]',
-  path = '[Path]',
-}  -- маппинг для нейросети, пока не работает
--- Загрузка кастомных снипетов
-  require("luasnip.loaders.from_lua").load({ paths = "~/.config/nvim/lua/snippets/" })
-
-  local lspkind = require('lspkind') -- Красивые шрифты
-  cmp.setup({
-    snippet = {
-      expand = function(args)
-        require('luasnip').lsp_expand(args.body)
-      end,
-    },
-    mapping = {
-      ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-      ['<C-f>'] = cmp.mapping.scroll_docs(4),
-      ['<C-Space>'] = cmp.mapping.complete(),
-      ['<C-e>'] = cmp.mapping.close(),
-      ['<CR>'] = cmp.mapping.confirm(),
-      ['<Down>'] = cmp.mapping.select_next_item(),
-      ['<Up>'] = cmp.mapping.select_prev_item(),
-      ['<Right>'] = cmp.mapping.scroll_docs(4),
-      ['<C-a>'] = cmp.mapping(cmp.mapping.complete({
-        config = {
-          sources = cmp.config.sources({
-              { name = 'cmp_ai' },
-            }),
-          },
-        }),
-        { 'i' }
-      ),
-    },
-    sources = cmp.config.sources({
-      -- { name = 'cmp_ai' },
-      { name = 'nvim_lsp' },
-      { name = 'luasnip' },
-    }, {
-      { name = 'buffer' },
-      { name = 'path' },
-    }),
-    formatting = {
-      format = lspkind.cmp_format({
-        mode = 'symbol', -- show only symbol annotations
-        maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
-                     -- can also be a function to dynamically calculate max width such as 
-                     -- maxwidth = function() return math.floor(0.45 * vim.o.columns) end,
-        ellipsis_char = '...', -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
-        show_labelDetails = true, -- show labelDetails in menu. Disabled by default
-
-      -- The function below will be called before any actual modifications from lspkind
-      -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
-        before = function(entry, vim_item)
-        -- Оборачиваем функции и классы в круглые скобки
-          if vim.tbl_contains({'Function', 'Method'}, vim_item.kind) then
-            vim_item.abbr = vim_item.abbr .. '()'
-          end
-          -- Это нужно будет включить, если найду небольшую нейронку
-          -- vim_item.kind = lspkind.symbolic(vim_item.kind, { mode = 'symbol' })
-          -- vim_item.menu = source_mapping[entry.source.name]
-          -- if entry.source.name == 'cmp_ai' then
-          --   local detail = (entry.completion_item.labelDetails or {}).detail
-          --   vim_item.kind = ''
-          --   if detail and detail:find('.*%%.*') then
-          --     vim_item.kind = vim_item.kind .. ' ' .. detail
-          --   end
-
-          --  if (entry.completion_item.data or {}).multiline then
-          --    vim_item.kind = vim_item.kind .. ' ' .. '[ML]'
-          --  end
-          --end
-          --local maxwidth = 80
-          --vim_item.abbr = string.sub(vim_item.abbr, 1, maxwidth)
-          return vim_item
-      end
-
-      })
-    }
-
-  })
-  -- LSP setup for Python
-  local venv_path = tostring(vim.fn.getenv('VIRTUAL_ENV'))
-  print('Python virtual env: ' .. venv_path)
-  -- Проверка внешних программ (lazygit, lazydocker, ctags и т.д.)
-  require('deps_check').check()
-  -- Гайд по окружению проекта (venv, переменные из .env / nvim_settings.ini)
-  require('project_settings').print_guide()
-  local python_settings = {}
-  if venv_path ~= '' and venv_path ~= 'NIL' then
-    -- pythonPath должен указывать на бинарник интерпретатора, а не на папку venv
-    python_settings = {
-      python = {
-        pythonPath = venv_path .. '/bin/python'
-      }
-    }
-  end
-  -- vim.lsp.config сливается с конфигом pyright из nvim-lspconfig;
-  -- запускает сервер mason-lspconfig (automatic_enable) при открытии буфера
-  vim.lsp.config('pyright', {
-    root_dir = get_root_dir,
-    capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities()),
-    settings = python_settings,
-    on_attach = function(client, bufnr)
-      local buf_map = function(bufnr, mode, lhs, rhs, opts)
-        opts = vim.tbl_extend("force", {noremap=true, silent=true}, opts or {})
-        vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, opts)
-      end
-
-      -- Переход к определению: Ctrl+] и Option+Click
-      buf_map(bufnr, "n", "<C-]>", "<cmd>lua vim.lsp.buf.definition()<CR>")
-      buf_map(bufnr, "n", "<M-LeftMouse>", "<LeftMouse><cmd>lua require('telescope.builtin').lsp_references()<CR>")
-      buf_map(bufnr, "n", "<C-LeftMouse>", "<LeftMouse><C-CR>")
-
-      -- Навигация назад/вперёд по истории переходов (как Cmd+[ / Cmd+] в PyCharm)
-      buf_map(bufnr, "n", "<M-[>", "<C-o>")  -- Option+[ = назад
-      buf_map(bufnr, "n", "<M-]>", "<C-i>")  -- Option+] = вперёд
-
-      -- Список использований функции или класса
-      buf_map(bufnr, "n", "<C-r>", "<cmd>lua require('telescope.builtin').lsp_references()<CR>")
-
-      -- Замена nvim-treesitter-refactor (архивирован, не работает с веткой main):
-      -- grr — переименование, gnd — переход к объявлению, теперь через LSP
-      buf_map(bufnr, "n", "grr", "<cmd>lua vim.lsp.buf.rename()<CR>")
-      buf_map(bufnr, "n", "gnd", "<cmd>lua vim.lsp.buf.definition()<CR>")
-    end,
-  })
-
-  -- Настройка посветки определений функции и класса
-  local lsp_highlight_group = vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
-  vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-    group = lsp_highlight_group,
-    callback = function(args)
-      -- Не все серверы (например, для markdown) поддерживают documentHighlight
-      if #vim.lsp.get_clients({ bufnr = args.buf, method = "textDocument/documentHighlight" }) > 0 then
-        vim.lsp.buf.document_highlight()
-      end
-    end,
-  })
-  vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-    group = lsp_highlight_group,
-    callback = function()
-      vim.lsp.buf.clear_references()
-    end,
-  })
--- Автодополнения от нейронки (пока не работает)
-local cmp_ai = require('cmp_ai.config')
-
-cmp_ai:setup({
-  max_lines = 100,
-  provider = 'Ollama',
-  provider_options = {
-    -- model = 'codegemma:latest',
-    -- model = 'deepseek-coder-v2:latest',
-    model = 'codellama:7b-code',
-  },
-  notify = true,
-  notify_callback = function(msg)
-    vim.notify(msg)
-  end,
-  run_on_every_keystroke = true,
-  ignored_file_types = {
-    -- default is not to ignore
-    -- uncomment to ignore in lua:
-    -- lua = true
-  },
-})
-
--- DAP для python
-local dap_python = require("dap-python")
--- Python для адаптера debugpy: активный venv, иначе системный python3/python.
--- (в системе может не быть команды `python` — тогда адаптер не стартует)
-local dap_py = vim.env.VIRTUAL_ENV_PYTHON
-if not dap_py or dap_py == '' then
-  dap_py = vim.fn.exepath('python3')
-  if dap_py == '' then dap_py = vim.fn.exepath('python') end
-end
-dap_python.setup(dap_py)
-dap_python.test_runner = vim.env.PYTESTRUNNER or 'pytest'
-
-
--- Автоматичеси открывать и закрывать окно при запуске дебаггера
-local dap, dapui = require("dap"), require("dapui")
-dap.listeners.before.attach.dapui_config = function()
-  dapui.open()
-end
-dap.listeners.before.launch.dapui_config = function()
-  dapui.open()
-end
--- dap.listeners.before.event_terminated.dapui_config = function()
---   dapui.close()
--- end
--- dap.listeners.before.event_exited.dapui_config = function()
---   dapui.close()
--- end
-
--- UI для дебага
-require("dapui").setup()
-
--- Вкладки сверху
-require("bufferline").setup{
-  options = {
-    -- левая кнопка — переключить вкладку в том окне, по чьим вкладкам кликнули
-    left_mouse_command = function(buf)
-      require('plugins.tab_context_menu').switch(buf)
-    end,
-    -- крестик на вкладке — закрытие без разрушения раскладки (см. M.close),
-    -- вместо дефолтного «bdelete! %d», который закрывает окно
-    close_command = function(buf)
-      require('plugins.tab_context_menu').close(buf)
-    end,
-    -- правая кнопка по вкладке — контекстное меню quickui вместо bdelete по умолчанию
-    right_mouse_command = function(buf)
-      require('plugins.tab_context_menu').open(buf)
-    end,
-  },
-}
--- Кнопка «≡» на вкладках, открывающая то же меню по левому клику
-require('plugins.tab_context_menu').setup_button()
-
--- Функция для вывода всех загруженных сниппетов
-local function print_snippets()
-  local ls = require("luasnip")
-  local snippets = ls.snippets
-  for ft, snips in pairs(snippets) do
-    print("Язык: " .. ft)
-    for _, snip in ipairs(snips) do
-      print("  Сниппет: " .. (snip.trigger or snip.name))
-    end
-  end
-end
-
--- Вызов функции для вывода сниппетов
-print_snippets()
-
--- Автоматически закрывать скобки
-local npairs = require("nvim-autopairs")
-npairs.setup({check_ts = true,})
-
-EOF
-
-"Настройка telescope + fzf
-lua require('telescope').load_extension('fzy_native')
-
-lua <<EOF
-vim.keymap.set('n', '<C-S-f>', function()
-  vim.ui.input({ prompt = 'Расширение файлов (*.py, *.lua, пусто = все): ' }, function(pattern)
-    if pattern == nil then return end
-    local opts = {}
-    if pattern ~= '' then
-      opts.glob_pattern = pattern
-    end
-    require('telescope.builtin').live_grep(opts)
-  end)
-end)
-
--- Ctrl+Enter: перейти к объявлению, или если уже на объявлении — показать использования
-vim.keymap.set('n', '<C-CR>', function()
-  local params = vim.lsp.util.make_position_params()
-  local current_file = vim.api.nvim_buf_get_name(0)
-  local current_line = vim.fn.line('.') - 1
-
-  vim.lsp.buf_request(0, 'textDocument/definition', params, function(err, result, ctx)
-    if err or not result or (type(result) == 'table' and vim.tbl_isempty(result)) then
-      require('telescope.builtin').lsp_references()
-      return
-    end
-
-    local def = type(result) == 'table' and result[1] or result
-    local def_uri = def.uri or def.targetUri
-    local def_range = def.range or def.targetSelectionRange or def.targetRange
-    local def_file = vim.uri_to_fname(def_uri)
-    local def_line = def_range.start.line
-
-    if def_file == current_file and def_line == current_line then
-      require('telescope.builtin').lsp_references()
-    else
-      -- Используем уже полученный результат вместо второго LSP-запроса
-      local client = vim.lsp.get_client_by_id(ctx.client_id)
-      local offset_encoding = client and client.offset_encoding or 'utf-8'
-      vim.lsp.util.jump_to_location(def, offset_encoding)
-    end
-  end)
-end)
-EOF
-
-" Переключение между окнами через Alt+стрелки
-nnoremap <A-Left>  <C-w>h
-nnoremap <A-Down>  <C-w>j
-nnoremap <A-Up>    <C-w>k
-nnoremap <A-Right> <C-w>l
-
-" Настройка сроллбара
-augroup ScrollbarInit
-  autocmd!
-  autocmd WinScrolled,VimResized,QuitPre * silent! lua require('scrollbar').show()
-  autocmd WinEnter,FocusGained           * silent! lua require('scrollbar').show()
-  autocmd WinLeave,BufLeave,BufWinLeave,FocusLost            * silent! lua require('scrollbar').clear()
-augroup end
-
-
+" Скроллбар
+source ~/.config/nvim/vim/plugins/scrollbar/main.vim

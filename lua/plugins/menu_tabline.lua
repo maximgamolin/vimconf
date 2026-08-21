@@ -12,13 +12,13 @@ local M = {}
 -- светлый фон по умолчанию (из-за этого буквы-хоткеи выглядели пятнами).
 local function apply_colors()
   local set = vim.api.nvim_set_hl
-  set(0, 'QuickDefaultBackground', { fg = '#586e75', bg = '#eee8d5' })          -- полоса меню и фон списков
-  set(0, 'QuickDefaultSel',        { fg = '#073642', bg = '#fdf6e3', bold = true }) -- активный пункт — светлый
-  set(0, 'QuickDefaultKey',        { fg = '#cb4b16', bg = '#eee8d5' })          -- буква-хоткей
-  set(0, 'QuickDefaultDisable',    { fg = '#93a1a1', bg = '#eee8d5' })          -- недоступные пункты
-  set(0, 'QuickDefaultHelp',       { fg = '#839496', bg = '#eee8d5' })          -- подсказки справа
-  set(0, 'QuickDefaultBorder',     { fg = '#93a1a1', bg = '#eee8d5' })
-  set(0, 'MenuBarSep',             { fg = '#b8b09c', bg = '#eee8d5' })          -- разделители в строке меню
+  set(0, 'QuickDefaultBackground', { fg = '#586e75', bg = '#eee8d5' }) -- полоса меню и фон списков
+  set(0, 'QuickDefaultSel', { fg = '#073642', bg = '#fdf6e3', bold = true }) -- активный пункт — светлый
+  set(0, 'QuickDefaultKey', { fg = '#cb4b16', bg = '#eee8d5' }) -- буква-хоткей
+  set(0, 'QuickDefaultDisable', { fg = '#93a1a1', bg = '#eee8d5' }) -- недоступные пункты
+  set(0, 'QuickDefaultHelp', { fg = '#839496', bg = '#eee8d5' }) -- подсказки справа
+  set(0, 'QuickDefaultBorder', { fg = '#93a1a1', bg = '#eee8d5' })
+  set(0, 'MenuBarSep', { fg = '#b8b09c', bg = '#eee8d5' }) -- разделители в строке меню
 end
 
 local cached_line
@@ -33,9 +33,7 @@ local function build_line()
     local title = text
     if show_key and pos and pos >= 0 then
       -- подсвечиваем букву-хоткей, как это делает сам quickui
-      title = text:sub(1, pos)
-          .. '%#QuickKey#' .. text:sub(pos + 1, pos + 1)
-          .. '%#QuickBG#' .. text:sub(pos + 2)
+      title = text:sub(1, pos) .. '%#QuickKey#' .. text:sub(pos + 1, pos + 1) .. '%#QuickBG#' .. text:sub(pos + 2)
     end
     -- кликабельная зона: клик передаёт номер раздела в MenuTablineClick
     table.insert(parts, ('%%%d@v:lua.MenuTablineClick@ %s %%X'):format(i, title))
@@ -76,14 +74,35 @@ local WINBAR = '%{%v:lua.nvim_bufferline()%}'
 
 local function update_winbar(win)
   win = win or vim.api.nvim_get_current_win()
-  if not vim.api.nvim_win_is_valid(win)
-      or vim.api.nvim_win_get_config(win).relative ~= '' then
+  if not vim.api.nvim_win_is_valid(win) or vim.api.nvim_win_get_config(win).relative ~= '' then
     return
   end
   local buf = vim.api.nvim_win_get_buf(win)
-  local want = vim.bo[buf].buftype == '' and vim.bo[buf].buflisted
+  -- Буфер картинки перехвачен image.nvim: тот ставит buftype=nowrite, но это
+  -- обычный открытый файл — вкладки в его окне нужны, как и в остальных
+  local is_image = vim.bo[buf].filetype == 'image_nvim'
+  local want = (vim.bo[buf].buftype == '' or is_image) and vim.bo[buf].buflisted
   if want then
     pcall(vim.api.nvim_set_option_value, 'winbar', WINBAR, { win = win })
+    if is_image then
+      -- Перерисовка окна (появление winbar, смена вкладки) стирает kitty-графику
+      -- в терминале, а image.nvim пропускает повторный render() при неизменной
+      -- геометрии («skipping render») — картинка остаётся невидимой. Ждём, пока
+      -- редроу закончится, и принудительно перепосылаем: clear(true) сбрасывает
+      -- rendered_geometry, поэтому render() передаёт пиксели заново.
+      vim.defer_fn(function()
+        local ok, image = pcall(require, 'image')
+        if not ok or not vim.api.nvim_win_is_valid(win) or vim.api.nvim_win_get_buf(win) ~= buf then
+          return
+        end
+        for _, img in ipairs(image.get_images({ window = win })) do
+          pcall(function()
+            img:clear(true)
+            img:render()
+          end)
+        end
+      end, 120)
+    end
     return
   end
   -- В не-файловых окнах убираем только СВОЙ winbar (вкладки bufferline), а
@@ -113,6 +132,15 @@ function M.setup()
   })
 
   vim.api.nvim_create_autocmd({ 'BufWinEnter', 'WinEnter', 'TermOpen' }, {
+    callback = function()
+      update_winbar()
+    end,
+  })
+
+  -- image.nvim перехватывает png/jpg после BufWinEnter (ставит buftype=nowrite
+  -- и filetype=image_nvim) — переустанавливаем winbar, когда это произошло
+  vim.api.nvim_create_autocmd('FileType', {
+    pattern = 'image_nvim',
     callback = function()
       update_winbar()
     end,

@@ -82,7 +82,7 @@ function M.close(bufnr)
   local repl = pick_replacement(bufnr)
   if repl then
     for _, w in ipairs(vim.api.nvim_list_wins()) do
-      if vim.api.nvim_win_get_buf(w) == bufnr then
+      if vim.api.nvim_win_is_valid(w) and vim.api.nvim_win_get_buf(w) == bufnr then
         vim.api.nvim_win_set_buf(w, repl)
       end
     end
@@ -101,16 +101,34 @@ function M.open(bufnr)
   _win = mp.winid ~= 0 and mp.winid or vim.api.nvim_get_current_win()
 
   local items = {
-    { 'Перейти',                           "lua require('plugins.tab_context_menu').action('goto')" },
-    { 'Разделить по горизонтали',          "lua require('plugins.tab_context_menu').action('split_h')" },
-    { 'Разделить по вертикали',            "lua require('plugins.tab_context_menu').action('split_v')" },
+    { 'Перейти', "lua require('plugins.tab_context_menu').action('goto')" },
+    {
+      'Разделить по горизонтали',
+      "lua require('plugins.tab_context_menu').action('split_h')",
+    },
+    {
+      'Разделить по вертикали',
+      "lua require('plugins.tab_context_menu').action('split_v')",
+    },
     { '--', '' },
-    { 'Закрыть',                           "lua require('plugins.tab_context_menu').action('close')" },
-    { 'Закрыть остальные',                 "lua require('plugins.tab_context_menu').action('close_others')" },
+    { 'Закрыть', "lua require('plugins.tab_context_menu').action('close')" },
+    {
+      'Закрыть остальные',
+      "lua require('plugins.tab_context_menu').action('close_others')",
+    },
     { '--', '' },
-    { 'Скопировать название файла',        "lua require('plugins.tab_context_menu').action('copy_name')" },
-    { 'Скопировать путь от корня проекта', "lua require('plugins.tab_context_menu').action('copy_rel')" },
-    { 'Скопировать полный путь на диске',  "lua require('plugins.tab_context_menu').action('copy_abs')" },
+    {
+      'Скопировать название файла',
+      "lua require('plugins.tab_context_menu').action('copy_name')",
+    },
+    {
+      'Скопировать путь от корня проекта',
+      "lua require('plugins.tab_context_menu').action('copy_rel')",
+    },
+    {
+      'Скопировать полный путь на диске',
+      "lua require('plugins.tab_context_menu').action('copy_abs')",
+    },
   }
 
   -- открываем меню под кликнутой вкладкой, а не у текстового курсора
@@ -189,8 +207,7 @@ function M.switch(bufnr)
     return
   end
   local win = vim.fn.getmousepos().winid
-  if win == 0 or not vim.api.nvim_win_is_valid(win)
-      or vim.api.nvim_win_get_config(win).relative ~= '' then
+  if win == 0 or not vim.api.nvim_win_is_valid(win) or vim.api.nvim_win_get_config(win).relative ~= '' then
     win = vim.api.nvim_get_current_win()
   end
   vim.api.nvim_set_current_win(win)

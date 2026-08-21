@@ -5,15 +5,17 @@ local M = {}
 
 -- бинарник → как установить (подсказка выводится, если не найден)
 local required = {
-  { bin = 'ctags',      hint = 'brew install universal-ctags' },                -- tagbar
-  { bin = 'fzf',        hint = 'brew install fzf' },
-  { bin = 'fd',         hint = 'brew install fd' },                             -- telescope find_files
-  { bin = 'rg',         hint = 'brew install ripgrep' },                        -- telescope live_grep
-  { bin = 'lazygit',    hint = 'brew install lazygit' },
+  { bin = 'ctags', hint = 'brew install universal-ctags' }, -- tagbar
+  { bin = 'fzf', hint = 'brew install fzf' },
+  { bin = 'fd', hint = 'brew install fd' }, -- telescope find_files
+  { bin = 'rg', hint = 'brew install ripgrep' }, -- telescope live_grep
+  { bin = 'lazygit', hint = 'brew install lazygit' },
   { bin = 'lazydocker', hint = 'brew install lazydocker' },
-  { bin = 'lazysql',    hint = 'brew install jorgerojas26/lazysql/lazysql' },
-  { bin = 'node',       hint = 'brew install node' },                           -- mason/pyright
-  { bin = 'claude',     hint = 'npm install -g @anthropic-ai/claude-code' },    -- claudecode.nvim
+  { bin = 'lazysql', hint = 'brew install jorgerojas26/lazysql/lazysql' },
+  { bin = 'node', hint = 'brew install node' }, -- mason/pyright
+  { bin = 'claude', hint = 'npm install -g @anthropic-ai/claude-code' }, -- claudecode.nvim
+  { bin = 'magick', hint = 'brew install imagemagick' }, -- image.nvim
+  { bin = 'plantuml', hint = 'brew install plantuml' }, -- diagram.nvim
 }
 
 function M.check()
