@@ -10,7 +10,6 @@ require('mason-lspconfig').setup({
     'cssls',
     'dockerls',
     'docker_compose_language_service',
-    'autotools_ls',
     'markdown_oxide',
     'nginx_language_server',
     'sqlls',
