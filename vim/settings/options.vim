@@ -12,7 +12,7 @@ set noshowmode     " Не печатать «-- ВИЗУАЛЬНЫЙ РЕЖИМ 
 set cursorline     " Подсветка текущей строки
 set showcmd        " Показ текущей команды
 set wildmenu       " Включить меню авто-дополнения
-set updatetime=250 " Для signify и LSP document_highlight (100 давало лишние LSP-запросы при движении)
+set updatetime=250 " Для gitsigns и LSP document_highlight (100 давало лишние LSP-запросы при движении)
 set expandtab      " Пробелы вместо табуляции
 
 set hlsearch       " Подсветка поиска

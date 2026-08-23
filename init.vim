@@ -34,12 +34,11 @@ Plug 'mbbill/undotree'
 Plug 'preservim/tagbar'
 " vim-fugitive для работы с Git
 Plug 'tpope/vim-fugitive'
-" vim-signify для показа символов изменений рядом с номерами строк
-Plug 'mhinz/vim-signify'
+" gitsigns: значки изменений у номеров строк, inline-blame, работа с кусками (hunks),
+" плюс источник git-подсветки для карты кода (neominimap)
+Plug 'lewis6991/gitsigns.nvim'
 " vim-merginal для работы с деревом Git
 Plug 'idanarye/vim-merginal'
-" Git lens
-Plug 'APZelos/blamer.nvim'
 " lazygit — интерактивный UI для git (требует: brew install lazygit)
 Plug 'kdheepak/lazygit.nvim'
 " Claude Code интеграция (требует: claude CLI)
@@ -107,7 +106,7 @@ lua require('project_settings').load()
 lua require('plugins.nvimtreeplug.main')
 lua require('plugins.vimbookmarks.main')
 lua require('plugins.vimairline.main')
-lua require('plugins.blamer.main')
+lua require('plugins.gitsigns.main')
 lua require('plugins.vimfloaterm.main')
 lua require('plugins.ibl.main')
 lua require('plugins.nvimtreesitter.main')
