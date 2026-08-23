@@ -88,6 +88,9 @@ Plug 'MeanderingProgrammer/render-markdown.nvim'
 Plug '3rd/image.nvim'
 " PlantUML/Mermaid диаграммы картинками в markdown (требует: brew install plantuml)
 Plug '3rd/diagram.nvim'
+" Diff-движок для локального ревью (lua/plugins/review): side-by-side/inline,
+" панель файлов, сравнение произвольных ревизий
+Plug 'esmuellert/codediff.nvim'
 call plug#end()
 
 " Опции, общие хоткеи, цветовая схема
@@ -149,3 +152,6 @@ lua require('plugins.autopairs.main')
 
 " Карта кода (миникарта)
 lua require('plugins.neominimap.main')
+
+" Локальное ревью в стиле GitLab MR (:ReviewOpen, замечания в .review/)
+lua require('plugins.review.main')

@@ -69,6 +69,21 @@ call quickui#menu#install('&Tools', [
         \ ["&SQL\t(\\ls)", 'lua LazySqlOpen()', 'lazysql: подключения к БД, таблицы, запросы'],
         \ ], 9500)
 
+" Review меню (вес 9550) — локальное ревью в стиле GitLab MR (lua/plugins/review)
+call quickui#menu#install('&Review', [
+        \ ['&Открыть ревью (от main)', 'ReviewOpen', 'Diff текущей ветки от merge-base с main; \\rc — замечание к строке'],
+        \ ['&Выбрать ветки/коммиты…', 'ReviewPick', 'Пошагово: база (ветка → коммит), голова (рабочее дерево / ветка → коммит)'],
+        \ ['Закрыть ревью', 'ReviewClose', ''],
+        \ ['--', ''],
+        \ ['&Список замечаний', 'ReviewComments', 'Все замечания ревью в quickfix'],
+        \ ['Открыть &файл в ревью', 'call feedkeys(":ReviewFile ")', 'Любой файл проекта — попадёт в «Просмотренные»'],
+        \ ['--', ''],
+        \ ['Опубликовать замечания (commit)', 'ReviewPublish', 'git commit папки .review/'],
+        \ ['Замечания закрыты (удалить+commit)', 'ReviewDone', 'Удалить .review/ и закоммитить удаление'],
+        \ ['--', ''],
+        \ ['Установить /fix-review в проект', 'ReviewClaudeSetup', 'Скопировать команду для Claude Code в .claude/commands'],
+        \ ], 9550)
+
 " Python меню (вес 9600 — после Tools)
 call quickui#menu#install('&Python', [
         \ ["&Тест: запуск / отладка\t(\\tt)", "lua require('plugins.pytest_runner').open_menu()", 'PyCharm-style: запустить или отладить тест-метод/класс под курсором'],
