@@ -6,6 +6,14 @@ set mousemodel=extend        " Правый клик доходит до обр�
 set smoothscroll             " Прокрутка по экранным строкам (длинные строки не «прыгают»)
 set clipboard=unnamedplus    " Синхронизировать буфер yank с системным буфером обмена
 
+" WezTerm 2024 г. некорректно обрабатывает synchronized output (DEC 2026):
+" при скролле склеивает куски старого и нового кадра — «разъезжающиеся»
+" панели в diff-окнах. Отключаем до обновления WezTerm (brew upgrade --cask
+" wezterm), после обновления блок можно удалить
+if $TERM_PROGRAM ==# 'WezTerm' && $TERM_PROGRAM_VERSION <# '20250101'
+  set notermsync
+endif
+
 set number         " Номера строк
 set laststatus=3   " Одна общая нижняя панель на всё окно вместо отдельной на каждый сплит
 set noshowmode     " Не печатать «-- ВИЗУАЛЬНЫЙ РЕЖИМ --» — режим и так виден в airline
