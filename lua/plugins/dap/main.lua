@@ -30,6 +30,7 @@ end
 -- end
 
 dapui.setup()
+require('nvim-dap-virtual-text').setup()
 
 -- Горячие клавиши
 local map = function(mode, lhs, rhs)

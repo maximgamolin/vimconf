@@ -63,6 +63,7 @@ Plug 'mfussenegger/nvim-dap'
 Plug 'nvim-neotest/nvim-nio'
 Plug 'rcarriga/nvim-dap-ui'
 Plug 'mfussenegger/nvim-dap-python'
+Plug 'theHamsta/nvim-dap-virtual-text'
 " Шрифты
 Plug 'onsails/lspkind.nvim'
 Plug 'ryanoasis/vim-devicons' " Дев иконки везде
