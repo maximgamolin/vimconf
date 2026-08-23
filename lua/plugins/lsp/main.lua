@@ -66,6 +66,9 @@ vim.lsp.config('pyright', {
       vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, opts)
     end
 
+    -- Быстрая документация (аналог Ctrl+Q в PyCharm)
+    buf_map('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>')
+
     -- Переход к определению: Ctrl+] и Option+Click
     buf_map('n', '<C-]>', '<cmd>lua vim.lsp.buf.definition()<CR>')
     buf_map('n', '<M-LeftMouse>', "<LeftMouse><cmd>lua require('telescope.builtin').lsp_references()<CR>")
