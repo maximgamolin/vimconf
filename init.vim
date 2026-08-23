@@ -2,7 +2,7 @@
 " Для python установить debugpy
 " Структура конфига:
 "   vim/settings/   — опции, общие хоткеи, цвета
-"   vim/plugins/    — конфиги плагинов на vimscript (меню, скроллбар)
+"   vim/plugins/    — конфиги плагинов на vimscript (меню)
 "   vim/functions/  — вспомогательные функции (git)
 "   lua/plugins/    — конфиги плагинов на lua (по папке на плагин)
 "   lua/style/      — цвета treesitter и отступов
@@ -12,8 +12,8 @@ Plug 'maxmx03/solarized.nvim'
 "Полоска снизу
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
-" Скроллбар
-Plug 'Xuyuanp/scrollbar.nvim'
+" Карта кода справа (как minimap в Sublime Text): раскраска treesitter, ошибки LSP, поиск
+Plug 'Isrothy/neominimap.nvim'
 "Цветные отступы
 Plug 'lukas-reineke/indent-blankline.nvim'
 "Терминал
@@ -147,5 +147,5 @@ lua require('plugins.bufferline.main')
 " Автозакрытие парных скобок
 lua require('plugins.autopairs.main')
 
-" Скроллбар
-source ~/.config/nvim/vim/plugins/scrollbar/main.vim
+" Карта кода (миникарта)
+lua require('plugins.neominimap.main')

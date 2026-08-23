@@ -88,6 +88,7 @@ call quickui#menu#install('H&elp', [
 
 call quickui#menu#install("&Window",[
         \ ['Toggle дерево файлов', 'NvimTreeToggle', ''],
+        \ ["Toggle карта кода\t(\\nm)", 'Neominimap Toggle', 'Миникарта справа как в Sublime: цвета кода, ошибки, поиск'],
         \ ['--', ''],
         \ ['Разделить по вертикали', 'vsp', ''],
         \ ['Разделить по горизонтали', 'sp', ''],
